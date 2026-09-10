@@ -1,0 +1,6 @@
+arb-dir: lib/l10n
+template-arb-file: twist_en.arb
+output-localization-file: twist_music_localizations.dart
+output-class: TwistMusicLocalizations
+output-dir: lib/src/l10n
+nullable-getter: false
