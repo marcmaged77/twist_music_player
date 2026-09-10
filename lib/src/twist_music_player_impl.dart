@@ -17,6 +17,7 @@ import 'presentation/controllers/twist_lane_controller.dart';
 import 'presentation/controllers/twist_player_controller.dart';
 import 'presentation/screens/twist_full_player_screen.dart';
 import 'presentation/widgets/download_prompt_sheet.dart';
+import 'presentation/widgets/twist_player_host.dart';
 
 /// Process-wide entry point. Call [init] once before `runApp`; every widget
 /// in the package resolves its dependencies through [instance].
@@ -137,7 +138,37 @@ class TwistMusicPlayer {
   /// Loading state of the shared lane.
   ValueListenable<TwistLaneState> get laneState => laneController.stateListenable;
 
-  // Full player ---------------------------------------------------------------
+  // Navigation ----------------------------------------------------------------
+
+  final ValueNotifier<bool> _packageRouteOpen = ValueNotifier<bool>(false);
+  int _openRoutes = 0;
+
+  /// True while the full player or one of the package's sheets is on screen.
+  /// [TwistPlayerHost] hides the docked mini player during that time because
+  /// it paints above every route.
+  ValueListenable<bool> get isPackageRouteOpen => _packageRouteOpen;
+
+  void _routeOpened() {
+    _openRoutes++;
+    _packageRouteOpen.value = true;
+  }
+
+  void _routeClosed() {
+    _openRoutes = _openRoutes > 0 ? _openRoutes - 1 : 0;
+    _packageRouteOpen.value = _openRoutes > 0;
+  }
+
+  /// A context that can push routes: [context] itself when it is under a
+  /// Navigator, otherwise the Navigator found inside the enclosing
+  /// [TwistPlayerHost] (whose mini player lives above the Navigator).
+  BuildContext _navigatorContext(BuildContext context) {
+    if (Navigator.maybeOf(context, rootNavigator: true) != null) return context;
+    final hosted = TwistPlayerHost.navigatorContextOf(context);
+    if (hosted != null) return hosted;
+    throw FlutterError(
+        'twist_music_player: no Navigator found. Place the widget under a '
+        'Navigator or inside TwistPlayerHost wrapping the MaterialApp child.');
+  }
 
   bool _fullPlayerOpen = false;
   bool get isFullPlayerOpen => _fullPlayerOpen;
@@ -145,16 +176,26 @@ class TwistMusicPlayer {
   /// Pushes the full player on the root navigator. When a download prompt
   /// becomes due while it is open, the player collapses first and the prompt
   /// follows, as on iOS.
-  Future<void> openFullPlayer(BuildContext context, {String? analyticsVia}) async {
+  ///
+  /// [expandFrom] is the global rectangle the page should grow out of, e.g.
+  /// the mini player's bounds; without it the page slides up.
+  Future<void> openFullPlayer(
+    BuildContext context, {
+    String? analyticsVia,
+    Rect? expandFrom,
+  }) async {
     if (_fullPlayerOpen || !engine.snapshot.isActive) return;
     final track = engine.snapshot.currentTrack;
     if (analyticsVia != null && track != null) {
       analytics.playerExpanded(track, via: analyticsVia);
     }
+    final navigator = Navigator.of(_navigatorContext(context), rootNavigator: true);
     _fullPlayerOpen = true;
-    final navigator = Navigator.of(context, rootNavigator: true);
+    _routeOpened();
     try {
-      final result = await navigator.push<Object?>(TwistFullPlayerRoute());
+      final result =
+          await navigator.push<Object?>(TwistFullPlayerRoute(expandFrom: expandFrom));
+      _fullPlayerOpen = false;
       if (result is TwistDownloadPromptRequest) {
         await Future<void>.delayed(const Duration(milliseconds: 350));
         if (!navigator.mounted) return;
@@ -163,6 +204,7 @@ class TwistMusicPlayer {
       }
     } finally {
       _fullPlayerOpen = false;
+      _routeClosed();
     }
   }
 
@@ -186,8 +228,15 @@ class TwistMusicPlayer {
     required String source,
   }) async {
     analytics.downloadPromptShown(request.track, source: source);
-    final didDownload =
-        await showTwistDownloadPrompt(context, request: request) ?? false;
+    _routeOpened();
+    bool didDownload;
+    try {
+      didDownload = await showTwistDownloadPrompt(_navigatorContext(context),
+              request: request) ??
+          false;
+    } finally {
+      _routeClosed();
+    }
     analytics.downloadPromptAction(request.track,
         action: didDownload ? 'download' : 'not_now', source: source);
     if (didDownload) await openDownloadLink(source: source, logClick: false);
@@ -243,6 +292,7 @@ class TwistMusicPlayer {
   Future<void> _dispose() async {
     await _activeSubscription.cancel();
     _isActive.dispose();
+    _packageRouteOpen.dispose();
     controller.dispose();
     laneController.dispose();
     await _audioHandler?.dispose();

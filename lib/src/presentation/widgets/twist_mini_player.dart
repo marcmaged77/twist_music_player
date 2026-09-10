@@ -43,7 +43,11 @@ class TwistMiniPlayer extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: onExpand ??
-                  () => player.openFullPlayer(context, analyticsVia: 'tap'),
+                  () => player.openFullPlayer(
+                        context,
+                        analyticsVia: 'tap',
+                        expandFrom: _globalRect(context),
+                      ),
               child: Container(
                 height: height,
                 decoration: BoxDecoration(
@@ -118,6 +122,13 @@ class TwistMiniPlayer extends StatelessWidget {
       },
     );
   }
+}
+
+/// The bar's bounds in global coordinates, for the expand transition.
+Rect? _globalRect(BuildContext context) {
+  final box = context.findRenderObject();
+  if (box is! RenderBox || !box.hasSize) return null;
+  return box.localToGlobal(Offset.zero) & box.size;
 }
 
 class _MiniButton extends StatelessWidget {

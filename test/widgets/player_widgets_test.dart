@@ -110,6 +110,49 @@ void main() {
       await tester.pump();
       expect(inset, 0);
     });
+
+    testWidgets('a docked mini player above the Navigator can still open the full player',
+        (tester) async {
+      final setup = await initTestPlayer();
+      await pumpTestApp(
+        tester,
+        const SizedBox.shrink(),
+        builder: (context, child) => TwistPlayerHost(bottomInset: 40, child: child!),
+      );
+      await setup.player.engine.play(track(1), queue: tracks(2));
+      await setup.backend.emitReady();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(find.text('Track 1'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(setup.player.isFullPlayerOpen, isTrue);
+      expect(find.text('PLAYING FROM TWIST MUSIC'), findsOneWidget);
+      expect(setup.player.isPackageRouteOpen.value, isTrue);
+      expect(tester.widget<IgnorePointer>(find.ancestor(
+        of: find.byType(TwistMiniPlayer),
+        matching: find.byType(IgnorePointer),
+      ).first).ignoring, isTrue);
+
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(setup.player.isPackageRouteOpen.value, isFalse);
+
+      await setup.player.engine.next();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Download Twist'), findsOneWidget);
+      await tester.tap(find.text('Not now'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(setup.player.engine.snapshot.queueIndex, 1);
+
+      await setup.player.stop();
+      await tester.pump();
+    });
   });
 
   group('TwistFullPlayerScreen', () {

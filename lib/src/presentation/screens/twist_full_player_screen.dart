@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -16,22 +18,94 @@ import '../widgets/full_player/full_player_top_bar.dart';
 import '../widgets/preview_badge.dart';
 import '../widgets/twist_artwork.dart';
 
-/// Slide-up route hosting [TwistFullPlayerScreen]. Pops with a
+/// Route hosting [TwistFullPlayerScreen]. Pops with a
 /// [TwistDownloadPromptRequest] when a prompt becomes due while open.
+///
+/// With [expandFrom] (the mini player's rectangle) the page grows out of the
+/// bar and shrinks back into it on close, the way the native player expands.
+/// Without it the page slides up from the bottom.
 class TwistFullPlayerRoute extends PageRouteBuilder<Object?> {
-  TwistFullPlayerRoute()
+  TwistFullPlayerRoute({Rect? expandFrom})
       : super(
           opaque: false,
           fullscreenDialog: true,
-          transitionDuration: const Duration(milliseconds: 350),
-          reverseTransitionDuration: const Duration(milliseconds: 300),
+          transitionDuration: const Duration(milliseconds: 420),
+          reverseTransitionDuration: const Duration(milliseconds: 320),
           pageBuilder: (_, __, ___) => const TwistFullPlayerScreen(),
-          transitionsBuilder: (_, animation, __, child) => SlideTransition(
-            position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
-                .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
-            child: child,
-          ),
+          transitionsBuilder: (context, animation, _, child) {
+            if (expandFrom == null) {
+              return SlideTransition(
+                position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero)
+                    .animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+                child: child,
+              );
+            }
+            return _ExpandFromRectTransition(
+              animation: animation,
+              origin: expandFrom,
+              child: child,
+            );
+          },
         );
+}
+
+/// Container transform: the full-size page is laid out at its final size and
+/// revealed through a rectangle that grows from [origin] to the screen while
+/// the corner radius relaxes from the mini player's capsule to square.
+class _ExpandFromRectTransition extends StatelessWidget {
+  const _ExpandFromRectTransition({
+    required this.animation,
+    required this.origin,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Rect origin;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final full = Offset.zero & size;
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.fastOutSlowIn,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return AnimatedBuilder(
+      animation: curved,
+      builder: (context, _) {
+        final t = curved.value;
+        final rect = Rect.lerp(origin, full, t)!;
+        final radius = lerpDouble(origin.height / 2, 0, t)!;
+        final contentOpacity = ((t - 0.15) / 0.45).clamp(0.0, 1.0);
+        return Stack(
+          children: [
+            Positioned.fromRect(
+              rect: rect,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(radius),
+                child: OverflowBox(
+                  alignment: Alignment.topCenter,
+                  minWidth: size.width,
+                  maxWidth: size.width,
+                  minHeight: size.height,
+                  maxHeight: size.height,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      const ColoredBox(color: TwistColors.darkNavy),
+                      Opacity(opacity: contentOpacity, child: child),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 /// The full player: promo card, artwork, scrub bar, controls and Up Next.
