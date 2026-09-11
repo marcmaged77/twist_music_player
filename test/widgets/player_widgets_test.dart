@@ -100,7 +100,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(inset, 64);
-      expect(find.descendant(of: find.byType(TwistMiniPlayerContent), matching: find.text('Track 1')),
+      expect(
+          find.descendant(of: find.byType(TwistMiniPlayerContent), matching: find.text('Track 1')),
           findsOneWidget);
 
       visible.value = false;
@@ -110,6 +111,33 @@ void main() {
       await setup.player.stop();
       await tester.pump();
       expect(inset, 0);
+    });
+
+    testWidgets('the docked bar renders its buttons under a Material 2 host theme', (tester) async {
+      final setup = await initTestPlayer();
+      await pumpTestApp(
+        tester,
+        const SizedBox.shrink(),
+        theme: ThemeData(useMaterial3: false),
+        builder: (context, child) => TwistPlayerHost(child: child!),
+      );
+
+      await setup.player.engine.play(track(1), queue: tracks(1));
+      await setup.backend.emitReady();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(tester.takeException(), isNull);
+      expect(find.byType(TwistMiniPlayerContent), findsOneWidget);
+
+      await tester.tap(find.descendant(
+        of: find.byType(TwistMiniPlayerContent),
+        matching: find.byIcon(Icons.pause_rounded),
+      ));
+      await tester.pump();
+      expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.paused);
+
+      await setup.player.stop();
+      await tester.pump();
     });
 
     testWidgets('the docked bar expands in place, collapses, and shows the prompt in its layer',
@@ -319,8 +347,7 @@ void main() {
       expect(find.text('Download Twist'), findsOneWidget);
       expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadPromptShown)?['source'],
           'prompt_mini');
-      expect(
-          setup.analytics.names.where((n) => n == TwistAnalyticsEvents.downloadPromptShown),
+      expect(setup.analytics.names.where((n) => n == TwistAnalyticsEvents.downloadPromptShown),
           hasLength(1));
 
       await tester.tap(find.text('Not now'));

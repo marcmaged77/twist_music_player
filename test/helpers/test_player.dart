@@ -42,6 +42,7 @@ Future<void> pumpTestApp(
   Locale locale = const Locale('en'),
   bool registerDelegate = true,
   TransitionBuilder? builder,
+  ThemeData? theme,
 }) async {
   addTearDown(() async {
     await tester.pumpWidget(const SizedBox.shrink());
@@ -52,6 +53,7 @@ Future<void> pumpTestApp(
     locale: locale,
     registerDelegate: registerDelegate,
     builder: builder,
+    theme: theme,
   ));
 }
 
@@ -61,8 +63,10 @@ Widget testApp(
   Locale locale = const Locale('en'),
   bool registerDelegate = true,
   TransitionBuilder? builder,
+  ThemeData? theme,
 }) {
   return MaterialApp(
+    theme: theme,
     locale: locale,
     supportedLocales: const [Locale('en'), Locale('ar')],
     localizationsDelegates: [
