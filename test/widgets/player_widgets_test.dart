@@ -100,7 +100,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(inset, 64);
-      expect(find.text('Track 1'), findsOneWidget);
+      expect(find.descendant(of: find.byType(TwistMiniPlayerContent), matching: find.text('Track 1')),
+          findsOneWidget);
 
       visible.value = false;
       await tester.pump();
@@ -111,7 +112,7 @@ void main() {
       expect(inset, 0);
     });
 
-    testWidgets('a docked mini player above the Navigator can still open the full player',
+    testWidgets('the docked bar expands in place, collapses, and shows the prompt in its layer',
         (tester) async {
       final setup = await initTestPlayer();
       await pumpTestApp(
@@ -119,32 +120,87 @@ void main() {
         const SizedBox.shrink(),
         builder: (context, child) => TwistPlayerHost(bottomInset: 40, child: child!),
       );
+      expect(setup.player.hasSurface, isTrue);
+
       await setup.player.engine.play(track(1), queue: tracks(2));
       await setup.backend.emitReady();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(TwistMiniPlayerContent), findsOneWidget);
 
-      await tester.tap(find.text('Track 1'));
+      await tester.tap(find.descendant(
+        of: find.byType(TwistMiniPlayerContent),
+        matching: find.text('Track 1'),
+      ));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
       expect(setup.player.isFullPlayerOpen, isTrue);
+      expect(setup.analytics.paramsOf(TwistAnalyticsEvents.playerExpanded)?['action'], 'tap');
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.byType(TwistMiniPlayerContent), findsNothing);
       expect(find.text('PLAYING FROM TWIST MUSIC'), findsOneWidget);
-      expect(setup.player.isPackageRouteOpen.value, isTrue);
-      expect(tester.widget<IgnorePointer>(find.ancestor(
-        of: find.byType(TwistMiniPlayer),
-        matching: find.byType(IgnorePointer),
-      ).first).ignoring, isTrue);
 
       await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(setup.player.isPackageRouteOpen.value, isFalse);
+      expect(setup.player.isFullPlayerOpen, isFalse);
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.byType(TwistMiniPlayerContent), findsOneWidget);
 
       await setup.player.engine.next();
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
       expect(find.text('Download Twist'), findsOneWidget);
+      expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadPromptShown)?['source'],
+          'prompt_mini');
+
+      await tester.tap(find.text('Not now'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump();
+      expect(find.text('Download Twist'), findsNothing);
+      expect(setup.player.engine.snapshot.queueIndex, 1);
+
+      await setup.player.stop();
+      await tester.pump();
+      expect(find.byType(TwistMiniPlayerContent), findsNothing);
+    });
+
+    testWidgets('a prompt due while expanded collapses the player first', (tester) async {
+      final setup = await initTestPlayer();
+      await pumpTestApp(
+        tester,
+        const SizedBox.shrink(),
+        builder: (context, child) => TwistPlayerHost(child: child!),
+      );
+      await setup.player.engine.play(track(1), queue: tracks(2));
+      await setup.backend.emitReady();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      await tester.tap(find.descendant(
+        of: find.byType(TwistMiniPlayerContent),
+        matching: find.text('Track 1'),
+      ));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(setup.player.isFullPlayerOpen, isTrue);
+      expect(find.byType(TwistMiniPlayerContent), findsNothing);
+
+      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.pump();
+      expect(setup.player.engine.snapshot.pendingDownloadPrompt?.reason,
+          TwistDownloadPromptReason.skip);
+      // Collapse spring (two frames), the 120 ms breather, then the sheet slide.
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 200));
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(setup.player.isFullPlayerOpen, isFalse);
+      expect(find.text('Download Twist'), findsOneWidget);
+      expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadPromptShown)?['source'],
+          'prompt_full_screen');
+
       await tester.tap(find.text('Not now'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));

@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'analytics/twist_analytics.dart';
 import 'config/twist_music_config.dart';
+import 'data/models/twist_track.dart';
 import 'data/playback/audio_session_controller.dart';
 import 'data/playback/just_audio_backend.dart';
 import 'data/playback/playback_backend.dart';
@@ -16,8 +18,11 @@ import 'data/playback/twist_playback_snapshot.dart';
 import 'presentation/controllers/twist_lane_controller.dart';
 import 'presentation/controllers/twist_player_controller.dart';
 import 'presentation/screens/twist_full_player_screen.dart';
+import 'presentation/twist_player_surface.dart';
 import 'presentation/widgets/download_prompt_sheet.dart';
 import 'presentation/widgets/twist_player_host.dart';
+import 'theme/twist_colors.dart';
+import 'utils/artwork_palette.dart';
 
 /// Process-wide entry point. Call [init] once before `runApp`; every widget
 /// in the package resolves its dependencies through [instance].
@@ -31,9 +36,8 @@ class TwistMusicPlayer {
     required TwistAudioHandler? audioHandler,
   }) : _audioHandler = audioHandler {
     _isActive = ValueNotifier<bool>(engine.snapshot.isActive);
-    _activeSubscription = engine.stream.listen((snapshot) {
-      _isActive.value = snapshot.isActive;
-    });
+    _engineSubscription = engine.stream.listen(_onSnapshot);
+    _updatePalette(engine.snapshot.currentTrack);
   }
 
   static TwistMusicPlayer? _instance;
@@ -130,7 +134,7 @@ class TwistMusicPlayer {
   final TwistAudioHandler? _audioHandler;
 
   late final ValueNotifier<bool> _isActive;
-  late final StreamSubscription<TwistPlaybackSnapshot> _activeSubscription;
+  late final StreamSubscription<TwistPlaybackSnapshot> _engineSubscription;
 
   /// True while a track is loaded (mini player worth showing).
   ValueListenable<bool> get isActive => _isActive;
@@ -138,14 +142,62 @@ class TwistMusicPlayer {
   /// Loading state of the shared lane.
   ValueListenable<TwistLaneState> get laneState => laneController.stateListenable;
 
+  void _onSnapshot(TwistPlaybackSnapshot snapshot) {
+    _isActive.value = snapshot.isActive;
+    _updatePalette(snapshot.currentTrack);
+  }
+
+  // Artwork palette -----------------------------------------------------------
+
+  final ValueNotifier<ArtworkPalette> _palette =
+      ValueNotifier<ArtworkPalette>(ArtworkPalette.fallback);
+  final ArtworkPaletteResolver _paletteResolver = ArtworkPaletteResolver();
+  Uri? _paletteUrl;
+
+  /// Dominant colours of the current artwork, resolved as soon as a track
+  /// starts so the full player never extracts them mid-animation.
+  ValueListenable<ArtworkPalette> get artworkPalette => _palette;
+
+  Future<void> _updatePalette(TwistTrack? track) async {
+    final url = track?.preferredFullArtworkUrl;
+    if (url == _paletteUrl) return;
+    _paletteUrl = url;
+    if (url == null) {
+      _palette.value = ArtworkPalette.fallback;
+      return;
+    }
+    try {
+      final palette =
+          await _paletteResolver.resolve(CachedNetworkImageProvider(url.toString()));
+      if (_paletteUrl == url && _instance == this) _palette.value = palette;
+    } catch (error, stack) {
+      config.onError?.call(error, stack);
+    }
+  }
+
+  // Surface -------------------------------------------------------------------
+
+  TwistPlayerSurface? _surface;
+
+  /// The mounted [TwistPlayerHost], if any. It expands the player in place
+  /// and presents sheets in its own layer.
+  bool get hasSurface => _surface != null;
+
+  void attachSurface(TwistPlayerSurface surface) {
+    _surface = surface;
+  }
+
+  void detachSurface(TwistPlayerSurface surface) {
+    if (identical(_surface, surface)) _surface = null;
+  }
+
   // Navigation ----------------------------------------------------------------
 
   final ValueNotifier<bool> _packageRouteOpen = ValueNotifier<bool>(false);
   int _openRoutes = 0;
 
-  /// True while the full player or one of the package's sheets is on screen.
-  /// [TwistPlayerHost] hides the docked mini player during that time because
-  /// it paints above every route.
+  /// True while the route-based full player or a modal sheet of the package
+  /// is on screen (hosts without [TwistPlayerHost]).
   ValueListenable<bool> get isPackageRouteOpen => _packageRouteOpen;
 
   void _routeOpened() {
@@ -160,7 +212,7 @@ class TwistMusicPlayer {
 
   /// A context that can push routes: [context] itself when it is under a
   /// Navigator, otherwise the Navigator found inside the enclosing
-  /// [TwistPlayerHost] (whose mini player lives above the Navigator).
+  /// [TwistPlayerHost].
   BuildContext _navigatorContext(BuildContext context) {
     if (Navigator.maybeOf(context, rootNavigator: true) != null) return context;
     final hosted = TwistPlayerHost.navigatorContextOf(context);
@@ -171,30 +223,32 @@ class TwistMusicPlayer {
   }
 
   bool _fullPlayerOpen = false;
-  bool get isFullPlayerOpen => _fullPlayerOpen;
 
-  /// Pushes the full player on the root navigator. When a download prompt
-  /// becomes due while it is open, the player collapses first and the prompt
-  /// follows, as on iOS.
-  ///
-  /// [expandFrom] is the global rectangle the page should grow out of, e.g.
-  /// the mini player's bounds; without it the page slides up.
-  Future<void> openFullPlayer(
-    BuildContext context, {
-    String? analyticsVia,
-    Rect? expandFrom,
-  }) async {
-    if (_fullPlayerOpen || !engine.snapshot.isActive) return;
+  /// True while the full player is expanded or pushed.
+  bool get isFullPlayerOpen => _surface?.isExpanded ?? _fullPlayerOpen;
+
+  /// Expands the player in place when a [TwistPlayerHost] is mounted,
+  /// otherwise pushes [TwistFullPlayerRoute] on the root navigator. A
+  /// download prompt raised while the route is open collapses it first and
+  /// the prompt follows, as on iOS.
+  Future<void> openFullPlayer(BuildContext context, {String? analyticsVia}) async {
+    if (isFullPlayerOpen || !engine.snapshot.isActive) return;
     final track = engine.snapshot.currentTrack;
     if (analyticsVia != null && track != null) {
       analytics.playerExpanded(track, via: analyticsVia);
     }
+
+    final surface = _surface;
+    if (surface != null) {
+      await surface.expand();
+      return;
+    }
+
     final navigator = Navigator.of(_navigatorContext(context), rootNavigator: true);
     _fullPlayerOpen = true;
     _routeOpened();
     try {
-      final result =
-          await navigator.push<Object?>(TwistFullPlayerRoute(expandFrom: expandFrom));
+      final result = await navigator.push<Object?>(TwistFullPlayerRoute());
       _fullPlayerOpen = false;
       if (result is TwistDownloadPromptRequest) {
         await Future<void>.delayed(const Duration(milliseconds: 350));
@@ -221,25 +275,45 @@ class TwistMusicPlayer {
   }
 
   /// Shows the prompt sheet, logs the outcome, opens the download link when
-  /// chosen and resolves the engine.
+  /// chosen and resolves the engine. Inside a [TwistPlayerHost] an expanded
+  /// player collapses first, then the sheet rises in the host's layer.
   Future<void> presentDownloadPrompt(
     BuildContext context,
     TwistDownloadPromptRequest request, {
     required String source,
   }) async {
-    analytics.downloadPromptShown(request.track, source: source);
-    _routeOpened();
+    final surface = _surface;
+    var effectiveSource = source;
     bool didDownload;
-    try {
-      didDownload = await showTwistDownloadPrompt(_navigatorContext(context),
-              request: request) ??
+    if (surface != null) {
+      if (surface.isExpanded) {
+        effectiveSource = TwistAnalyticsSources.promptFullScreen;
+        await surface.collapse();
+        await Future<void>.delayed(const Duration(milliseconds: 120));
+      }
+      analytics.downloadPromptShown(request.track, source: effectiveSource);
+      didDownload = await surface.showSheet<bool>(
+            (_) => const DecoratedBox(
+              decoration: BoxDecoration(
+                color: TwistColors.darkNavy,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: TwistDownloadPromptBody(),
+            ),
+          ) ??
           false;
-    } finally {
-      _routeClosed();
+    } else {
+      analytics.downloadPromptShown(request.track, source: effectiveSource);
+      _routeOpened();
+      try {
+        didDownload = await showTwistDownloadPrompt(_navigatorContext(context)) ?? false;
+      } finally {
+        _routeClosed();
+      }
     }
     analytics.downloadPromptAction(request.track,
-        action: didDownload ? 'download' : 'not_now', source: source);
-    if (didDownload) await openDownloadLink(source: source, logClick: false);
+        action: didDownload ? 'download' : 'not_now', source: effectiveSource);
+    if (didDownload) await openDownloadLink(source: effectiveSource, logClick: false);
     await engine.resolveDownloadPrompt(didDownload: didDownload);
     _claimedPrompt = null;
   }
@@ -290,8 +364,9 @@ class TwistMusicPlayer {
   }
 
   Future<void> _dispose() async {
-    await _activeSubscription.cancel();
+    await _engineSubscription.cancel();
     _isActive.dispose();
+    _palette.dispose();
     _packageRouteOpen.dispose();
     controller.dispose();
     laneController.dispose();

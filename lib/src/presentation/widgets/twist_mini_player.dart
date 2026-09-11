@@ -31,9 +31,6 @@ class TwistMiniPlayer extends StatelessWidget {
         if (!snapshot.isActive || track == null) return const SizedBox.shrink();
         final strings = twistStrings(context);
         final theme = TwistMusicTheme.of(context);
-        final foreground = theme.miniPlayerForeground ?? Theme.of(context).colorScheme.onSurface;
-        final loading = snapshot.status == TwistPlaybackStatus.loading;
-
         return TwistPromptListener(
           child: Semantics(
             identifier: 'twistMusic_miniPlayerExpandBtn',
@@ -42,12 +39,7 @@ class TwistMiniPlayer extends StatelessWidget {
             button: true,
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: onExpand ??
-                  () => player.openFullPlayer(
-                        context,
-                        analyticsVia: 'tap',
-                        expandFrom: _globalRect(context),
-                      ),
+              onTap: onExpand ?? () => player.openFullPlayer(context, analyticsVia: 'tap'),
               child: Container(
                 height: height,
                 decoration: BoxDecoration(
@@ -62,56 +54,7 @@ class TwistMiniPlayer extends StatelessWidget {
                     filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                     child: ColoredBox(
                       color: theme.miniPlayerBackground ?? const Color(0xB8FFFFFF),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          children: [
-                            ExcludeSemantics(
-                              child: TwistArtwork(
-                                url: track.preferredFullArtworkUrl,
-                                size: 44,
-                                radius: 10,
-                                placeholderColor: theme.artworkPlaceholder,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(track.title,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: theme.miniPlayerTitleStyle),
-                                  const SizedBox(height: 3),
-                                  PreviewBadge(
-                                      isPlaying: snapshot.isPlaying,
-                                      tint: foreground.withValues(alpha: 0.6)),
-                                ],
-                              ),
-                            ),
-                            _MiniButton(
-                              identifier: 'twistMusic_miniPlayerPlayPauseBtn',
-                              label: snapshot.isPlaying ? strings.pauseAction : strings.playAction,
-                              icon: snapshot.isPlaying
-                                  ? Icons.pause_rounded
-                                  : Icons.play_arrow_rounded,
-                              size: 24,
-                              color: foreground,
-                              onPressed: loading ? null : player.controller.togglePlayPause,
-                            ),
-                            _MiniButton(
-                              identifier: 'twistMusic_miniPlayerCloseBtn',
-                              label: strings.miniPlayerClose,
-                              icon: Icons.close_rounded,
-                              size: 18,
-                              color: foreground.withValues(alpha: 0.6),
-                              onPressed: player.controller.stop,
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: TwistMiniPlayerContent(snapshot: snapshot),
                     ),
                   ),
                 ),
@@ -124,11 +67,78 @@ class TwistMiniPlayer extends StatelessWidget {
   }
 }
 
-/// The bar's bounds in global coordinates, for the expand transition.
-Rect? _globalRect(BuildContext context) {
-  final box = context.findRenderObject();
-  if (box is! RenderBox || !box.hasSize) return null;
-  return box.localToGlobal(Offset.zero) & box.size;
+/// The mini bar's row without its capsule: artwork slot, title, badge and
+/// the two buttons. Shared by [TwistMiniPlayer] and the in-host expansion.
+class TwistMiniPlayerContent extends StatelessWidget {
+  const TwistMiniPlayerContent({
+    super.key,
+    required this.snapshot,
+    this.showArtwork = true,
+  });
+
+  final TwistPlaybackSnapshot snapshot;
+
+  /// False leaves an empty 44-pt slot for a flying artwork to sit on.
+  final bool showArtwork;
+
+  @override
+  Widget build(BuildContext context) {
+    final player = TwistMusicPlayer.instance;
+    final track = snapshot.currentTrack;
+    final strings = twistStrings(context);
+    final theme = TwistMusicTheme.of(context);
+    final foreground = theme.miniPlayerForeground ?? Theme.of(context).colorScheme.onSurface;
+    final loading = snapshot.status == TwistPlaybackStatus.loading;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          ExcludeSemantics(
+            child: showArtwork
+                ? TwistArtwork(
+                    url: track?.preferredFullArtworkUrl,
+                    size: 44,
+                    radius: 10,
+                    placeholderColor: theme.artworkPlaceholder,
+                  )
+                : const SizedBox(width: 44, height: 44),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(track?.title ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.miniPlayerTitleStyle),
+                const SizedBox(height: 3),
+                PreviewBadge(
+                    isPlaying: snapshot.isPlaying, tint: foreground.withValues(alpha: 0.6)),
+              ],
+            ),
+          ),
+          _MiniButton(
+            identifier: 'twistMusic_miniPlayerPlayPauseBtn',
+            label: snapshot.isPlaying ? strings.pauseAction : strings.playAction,
+            icon: snapshot.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+            size: 24,
+            color: foreground,
+            onPressed: loading ? null : player.controller.togglePlayPause,
+          ),
+          _MiniButton(
+            identifier: 'twistMusic_miniPlayerCloseBtn',
+            label: strings.miniPlayerClose,
+            icon: Icons.close_rounded,
+            size: 18,
+            color: foreground.withValues(alpha: 0.6),
+            onPressed: player.controller.stop,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MiniButton extends StatelessWidget {

@@ -7,6 +7,7 @@ import '../../../theme/twist_colors.dart';
 import '../../../twist_music_player_impl.dart';
 import '../equalizer_bars.dart';
 import '../twist_artwork.dart';
+import '../twist_sheet_scope.dart';
 
 /// "Up Next" entry point; hidden while the queue is empty.
 class FullPlayerQueueButton extends StatelessWidget {
@@ -42,115 +43,110 @@ class FullPlayerQueueButton extends StatelessWidget {
   }
 }
 
-/// Half-to-full sheet listing the whole lane; the current row is highlighted.
-/// Stays open after a pick, as in the native player.
+/// Modal queue sheet for hosts without a [TwistPlayerHost].
 Future<void> showTwistQueueSheet(BuildContext context, {required Color background}) {
   return showModalBottomSheet<void>(
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => Directionality(
-      textDirection: TextDirection.ltr,
-      child: DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        minChildSize: 0.35,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) => _QueueSheetBody(
-          background: background,
-          scrollController: scrollController,
-        ),
-      ),
+    builder: (context) => FractionallySizedBox(
+      heightFactor: 0.6,
+      child: TwistQueueSheetBody(background: background),
     ),
   );
 }
 
-class _QueueSheetBody extends StatelessWidget {
-  const _QueueSheetBody({required this.background, required this.scrollController});
+/// Whole lane with the current row highlighted. Stays open after a pick,
+/// as in the native player.
+class TwistQueueSheetBody extends StatelessWidget {
+  const TwistQueueSheetBody({super.key, required this.background});
 
   final Color background;
-  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
     final player = TwistMusicPlayer.instance;
-    return Container(
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      child: ValueListenableBuilder<TwistPlaybackSnapshot>(
-        valueListenable: player.controller,
-        builder: (context, snapshot, _) {
-          final current = snapshot.currentTrack;
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            snapshot.laneTitle ?? twistStrings(context).swimlaneTitle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                                color: TwistColors.onDark),
-                          ),
-                          if (snapshot.laneSubTitle != null)
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Container(
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: ValueListenableBuilder<TwistPlaybackSnapshot>(
+          valueListenable: player.controller,
+          builder: (context, snapshot, _) {
+            final current = snapshot.currentTrack;
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 20, 16, 14),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              snapshot.laneSubTitle!,
+                              snapshot.laneTitle ?? twistStrings(context).swimlaneTitle,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14, color: Color(0x80FFFFFF)),
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w700,
+                                  color: TwistColors.onDark),
                             ),
-                        ],
+                            if (snapshot.laneSubTitle != null)
+                              Text(
+                                snapshot.laneSubTitle!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 14, color: Color(0x80FFFFFF)),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: IconButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: const Icon(Icons.close_rounded, size: 18, color: Color(0x99FFFFFF)),
+                      SizedBox(
+                        width: 30,
+                        height: 30,
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          onPressed: () => TwistSheetScope.closeWith(context, null),
+                          icon: const Icon(Icons.close_rounded,
+                              size: 18, color: Color(0x99FFFFFF)),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              const Divider(height: 1, color: Color(0x1AFFFFFF)),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: snapshot.queue.length,
-                  itemBuilder: (context, index) {
-                    final track = snapshot.queue[index];
-                    final isCurrent = track.id == current?.id;
-                    return _QueueRow(
-                      track: track,
-                      isCurrent: isCurrent,
-                      isPlaying: isCurrent && snapshot.isPlaying,
-                      onTap: () {
-                        if (current != null) {
-                          player.analytics.queueTrackSelected(
-                              from: current, to: track, position: index + 1);
-                        }
-                        player.controller.selectFromQueue(track);
-                      },
-                    );
-                  },
+                const Divider(height: 1, color: Color(0x1AFFFFFF)),
+                Expanded(
+                  child: ListView.builder(
+                    padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+                    itemCount: snapshot.queue.length,
+                    itemBuilder: (context, index) {
+                      final track = snapshot.queue[index];
+                      final isCurrent = track.id == current?.id;
+                      return _QueueRow(
+                        track: track,
+                        isCurrent: isCurrent,
+                        isPlaying: isCurrent && snapshot.isPlaying,
+                        onTap: () {
+                          if (current != null) {
+                            player.analytics.queueTrackSelected(
+                                from: current, to: track, position: index + 1);
+                          }
+                          player.controller.selectFromQueue(track);
+                        },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

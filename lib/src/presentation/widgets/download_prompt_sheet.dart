@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 
-import '../../data/playback/twist_playback_snapshot.dart';
 import '../../l10n/twist_strings.dart';
 import '../../theme/twist_colors.dart';
 import '../../theme/twist_music_theme.dart';
 import '../../twist_music_player_impl.dart';
+import 'twist_sheet_scope.dart';
 
-/// Modal "download Twist" sheet. Resolves to true for Download, false for
-/// "Not now", null when dismissed by swipe.
-Future<bool?> showTwistDownloadPrompt(
-  BuildContext context, {
-  required TwistDownloadPromptRequest request,
-}) {
+/// Modal "download Twist" sheet for hosts without a [TwistPlayerHost].
+/// Resolves to true for Download, false for "Not now", null when dismissed.
+Future<bool?> showTwistDownloadPrompt(BuildContext context) {
   return showModalBottomSheet<bool>(
     context: context,
     useRootNavigator: true,
@@ -19,12 +16,14 @@ Future<bool?> showTwistDownloadPrompt(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
-    builder: (context) => const _DownloadPromptBody(),
+    builder: (context) => const TwistDownloadPromptBody(),
   );
 }
 
-class _DownloadPromptBody extends StatelessWidget {
-  const _DownloadPromptBody();
+/// Sheet content: logo, headline, subtitle, Download and Not now. Closes
+/// itself through [TwistSheetScope] with a bool result.
+class TwistDownloadPromptBody extends StatelessWidget {
+  const TwistDownloadPromptBody({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +78,7 @@ class _DownloadPromptBody extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                     ),
-                    onPressed: () => Navigator.of(context).pop(true),
+                    onPressed: () => TwistSheetScope.closeWith(context, true),
                     child: Text(strings.downloadPromptCta),
                   ),
                 ),
@@ -93,7 +92,7 @@ class _DownloadPromptBody extends StatelessWidget {
               container: true,
               button: true,
               child: TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
+                onPressed: () => TwistSheetScope.closeWith(context, false),
                 child: Text(
                   strings.downloadPromptDismiss,
                   style: const TextStyle(

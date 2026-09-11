@@ -34,7 +34,10 @@ class _TwistPromptListenerState extends State<TwistPromptListener> {
 
   void _check() {
     final request = _player.controller.value.pendingDownloadPrompt;
-    if (request == null || _player.isFullPlayerOpen) return;
+    if (request == null) return;
+    // A route-based full player pops itself with the request; an in-host
+    // expansion is collapsed by the facade before the sheet shows.
+    if (_player.isFullPlayerOpen && !_player.hasSurface) return;
     if (!_player.claimDownloadPrompt(request)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

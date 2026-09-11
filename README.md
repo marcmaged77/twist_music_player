@@ -103,8 +103,8 @@ player.stop(resetSession: true);     // logout
 |---|---|
 | `TwistMusicSwimlane` | Header, peek carousel of cards, "Preview" / "Now Playing" badges. Loads the lane itself. `loadingBuilder`, `emptyBuilder`, `onContentAvailabilityChanged`. |
 | `TwistMiniPlayer` | The 56-pt capsule: artwork, title, badge, play/pause, close. No positioning of its own. |
-| `TwistPlayerHost` | Optional: docks `TwistMiniPlayer` above `bottomInset` with a `visible` listenable and `bottomPaddingOf(context)` for scroll views. It paints above every route of the app it wraps, so it hides the bar while the package's full player or sheets are open and finds the app's Navigator inside its child on demand. |
-| `TwistFullPlayerScreen` / `TwistFullPlayerRoute` | Promo card, artwork, scrub bar, controls, Up Next sheet, artwork-tinted gradient. Forced left-to-right. Opened from the mini player it grows out of the bar's rectangle (`expandFrom`) and shrinks back on close; opened any other way it slides up. |
+| `TwistPlayerHost` | Recommended: docks the bar above `bottomInset` and expands the player in place. One surface morphs from the 56-pt bar to the full screen on a spring, the artwork flies from its 44-pt slot to the full-size slot, the bar's row fades out and the full content fades in, the way the native player expands. Drag down to collapse. The queue and the download prompt render in the same layer. `visible` hides the bar, `bottomPaddingOf(context)` reserves space in scroll views. |
+| `TwistFullPlayerScreen` / `TwistFullPlayerRoute` | Fallback for hosts without `TwistPlayerHost`: the same content as a slide-up route with drag-to-dismiss and modal sheets. Promo card, artwork, scrub bar, controls, Up Next, artwork-tinted gradient, forced left-to-right. |
 | `TwistPlayerController` | `ChangeNotifier` mirror of the engine for custom UIs. |
 | `TwistLaneSource` | Where tracks come from. `HttpTwistLaneSource` is the default; `FixtureTwistLaneSource` for tests. |
 

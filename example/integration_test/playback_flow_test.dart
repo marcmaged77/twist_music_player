@@ -10,7 +10,10 @@ import 'package:twist_music_player_example/main.dart' as app;
 ///
 /// `flutter test integration_test/playback_flow_test.dart -d <device>`
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+  // Let animations run on the real clock; the default policy only renders a
+  // frame per pump, which would freeze the player's spring mid-expansion.
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized().framePolicy =
+      LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('lane, playback, full player, mini player and prompt', (tester) async {
     await app.main();
