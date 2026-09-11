@@ -89,53 +89,57 @@ class TwistMiniPlayerContent extends StatelessWidget {
     final theme = TwistMusicTheme.of(context);
     final foreground = theme.miniPlayerForeground ?? Theme.of(context).colorScheme.onSurface;
     final loading = snapshot.status == TwistPlaybackStatus.loading;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          ExcludeSemantics(
-            child: showArtwork
-                ? TwistArtwork(
-                    url: track?.preferredFullArtworkUrl,
-                    size: 44,
-                    radius: 10,
-                    placeholderColor: theme.artworkPlaceholder,
-                  )
-                : const SizedBox(width: 44, height: 44),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(track?.title ?? '',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.miniPlayerTitleStyle),
-                const SizedBox(height: 3),
-                PreviewBadge(
-                    isPlaying: snapshot.isPlaying, tint: foreground.withValues(alpha: 0.6)),
-              ],
+    // Hosts mount the bar above the Navigator; supply the Material ancestor the buttons need.
+    return Material(
+      type: MaterialType.transparency,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            ExcludeSemantics(
+              child: showArtwork
+                  ? TwistArtwork(
+                      url: track?.preferredFullArtworkUrl,
+                      size: 44,
+                      radius: 10,
+                      placeholderColor: theme.artworkPlaceholder,
+                    )
+                  : const SizedBox(width: 44, height: 44),
             ),
-          ),
-          _MiniButton(
-            identifier: 'twistMusic_miniPlayerPlayPauseBtn',
-            label: snapshot.isPlaying ? strings.pauseAction : strings.playAction,
-            icon: snapshot.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            size: 24,
-            color: foreground,
-            onPressed: loading ? null : player.controller.togglePlayPause,
-          ),
-          _MiniButton(
-            identifier: 'twistMusic_miniPlayerCloseBtn',
-            label: strings.miniPlayerClose,
-            icon: Icons.close_rounded,
-            size: 18,
-            color: foreground.withValues(alpha: 0.6),
-            onPressed: player.controller.stop,
-          ),
-        ],
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(track?.title ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.miniPlayerTitleStyle),
+                  const SizedBox(height: 3),
+                  PreviewBadge(
+                      isPlaying: snapshot.isPlaying, tint: foreground.withValues(alpha: 0.6)),
+                ],
+              ),
+            ),
+            _MiniButton(
+              identifier: 'twistMusic_miniPlayerPlayPauseBtn',
+              label: snapshot.isPlaying ? strings.pauseAction : strings.playAction,
+              icon: snapshot.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              size: 24,
+              color: foreground,
+              onPressed: loading ? null : player.controller.togglePlayPause,
+            ),
+            _MiniButton(
+              identifier: 'twistMusic_miniPlayerCloseBtn',
+              label: strings.miniPlayerClose,
+              icon: Icons.close_rounded,
+              size: 18,
+              color: foreground.withValues(alpha: 0.6),
+              onPressed: player.controller.stop,
+            ),
+          ],
+        ),
       ),
     );
   }
