@@ -37,7 +37,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
     await _waitUntil(tester, () => !player.isFullPlayerOpen, const Duration(seconds: 5));
     await tester.pump(const Duration(seconds: 3));
-    expect(find.byType(TwistMiniPlayer), findsOneWidget);
+    expect(find.byType(TwistMiniPlayerContent), findsOneWidget);
     expect(find.text('Preview'), findsWidgets);
 
     await player.controller.next();
