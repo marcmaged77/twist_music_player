@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../theme/twist_colors.dart';
 
@@ -23,8 +24,7 @@ class TwistArtwork extends StatelessWidget {
     final placeholder = placeholderColor ?? TwistColors.artworkPlaceholder;
     final fallback = ColoredBox(
       color: placeholder,
-      child: Icon(Icons.music_note_rounded,
-          size: size * 0.4, color: Colors.black.withValues(alpha: 0.25)),
+      child: Icon(Iconsax.musicnote, size: size * 0.4, color: Colors.black.withValues(alpha: 0.25)),
     );
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),

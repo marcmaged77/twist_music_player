@@ -56,8 +56,7 @@ class TwistAudioHandler extends BaseAudioHandler with SeekHandler {
       androidCompactActionIndices: const [0, 1, 2],
       processingState: _processingState(snapshot.status),
       playing: snapshot.isPlaying,
-      updatePosition:
-          Duration(milliseconds: (snapshot.progressSeconds * 1000).round()),
+      updatePosition: Duration(milliseconds: (snapshot.progressSeconds * 1000).round()),
       queueIndex: snapshot.hasQueue ? snapshot.queueIndex : null,
     ));
   }
@@ -112,8 +111,7 @@ class TwistAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> skipToPrevious() => _engine.previous();
 
   @override
-  Future<void> seek(Duration position) =>
-      _engine.seek(position.inMilliseconds / 1000);
+  Future<void> seek(Duration position) => _engine.seek(position.inMilliseconds / 1000);
 
   @override
   Future<void> stop() async {

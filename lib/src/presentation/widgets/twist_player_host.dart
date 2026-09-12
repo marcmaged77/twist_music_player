@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter, lerpDouble;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:flutter/physics.dart';
 
 import '../../analytics/twist_analytics.dart';
@@ -56,9 +57,8 @@ class TwistPlayerHost extends StatefulWidget {
 
   /// A context under the Navigator inside the nearest [TwistPlayerHost], or
   /// null when [context] is not inside one.
-  static BuildContext? navigatorContextOf(BuildContext context) => context
-      .getInheritedWidgetOfExactType<_TwistHostScope>()
-      ?.findNavigatorContext();
+  static BuildContext? navigatorContextOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<_TwistHostScope>()?.findNavigatorContext();
 
   @override
   State<TwistPlayerHost> createState() => _TwistPlayerHostState();
@@ -134,8 +134,7 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
     if (request == null || !_player.claimDownloadPrompt(request)) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _player.presentDownloadPrompt(context, request,
-          source: TwistAnalyticsSources.promptMini);
+      _player.presentDownloadPrompt(context, request, source: TwistAnalyticsSources.promptMini);
     });
   }
 
@@ -197,8 +196,7 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
 
   void _onDragUpdate(DragUpdateDetails details, double height) {
     if (!_expanded) return;
-    _expansion.value =
-        (_expansion.value - (details.primaryDelta ?? 0) / height).clamp(0.0, 1.0);
+    _expansion.value = (_expansion.value - (details.primaryDelta ?? 0) / height).clamp(0.0, 1.0);
   }
 
   void _onDragEnd(DragEndDetails details, double height) {
@@ -300,8 +298,7 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
                 child: Stack(
                   children: [
                     KeyedSubtree(key: _childKey, child: widget.child),
-                    if (show)
-                      ..._buildOverlay(context, size, barRect, fullRect, fullRadius, t),
+                    if (show) ..._buildOverlay(context, size, barRect, fullRect, fullRadius, t),
                   ],
                 ),
               );
@@ -383,7 +380,9 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
                       if (t > 0)
                         Opacity(
                           opacity: surfaceOpacity,
-                          child: DecoratedBox(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 800),
+                            curve: Curves.easeInOut,
                             decoration: BoxDecoration(
                               color: TwistColors.darkNavy,
                               gradient: fullPlayerGradient(palette),
@@ -427,8 +426,7 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
                             opacity: miniOpacity,
                             child: IgnorePointer(
                               ignoring: t > 0,
-                              child: TwistMiniPlayerContent(
-                                  snapshot: snapshot, showArtwork: false),
+                              child: TwistMiniPlayerContent(snapshot: snapshot, showArtwork: false),
                             ),
                           ),
                         ),
@@ -450,9 +448,8 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
               child: artworkUrl == null
                   ? ColoredBox(
                       color: theme.artworkPlaceholder ?? TwistColors.artworkPlaceholder,
-                      child: Icon(Icons.music_note_rounded,
-                          size: artRect.width * 0.4,
-                          color: Colors.black.withValues(alpha: 0.25)),
+                      child: Icon(Iconsax.musicnote,
+                          size: artRect.width * 0.4, color: Colors.black.withValues(alpha: 0.25)),
                     )
                   : CachedNetworkImage(
                       imageUrl: artworkUrl.toString(),

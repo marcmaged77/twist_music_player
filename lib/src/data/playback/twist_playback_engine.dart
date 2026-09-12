@@ -163,8 +163,7 @@ class TwistPlaybackEngine {
   Future<void> seek(double seconds) async {
     if (!_snapshot.isActive || _snapshot.currentTrack == null) return;
     final clamped = seconds.clamp(0.0, previewSeconds).toDouble();
-    await _guard(() =>
-        _backend.seek(Duration(milliseconds: (clamped * 1000).round())));
+    await _guard(() => _backend.seek(Duration(milliseconds: (clamped * 1000).round())));
     _emit(_snapshot.copyWith(progressSeconds: clamped));
   }
 
@@ -310,16 +309,14 @@ class TwistPlaybackEngine {
     _promptShowsUsedThisSession++;
     _promptShownTrackIds.add(track.id);
     var status = _snapshot.status;
-    if (reason != TwistDownloadPromptReason.completed &&
-        status == TwistPlaybackStatus.playing) {
+    if (reason != TwistDownloadPromptReason.completed && status == TwistPlaybackStatus.playing) {
       await _guard(() => _backend.pause());
       status = TwistPlaybackStatus.paused;
     }
     await _guard(() => _session.deactivate());
     _emit(_snapshot.copyWith(
       status: status,
-      pendingDownloadPrompt:
-          TwistDownloadPromptRequest(reason: reason, track: track),
+      pendingDownloadPrompt: TwistDownloadPromptRequest(reason: reason, track: track),
     ));
   }
 
@@ -363,14 +360,12 @@ class TwistPlaybackEngine {
   void _onBackendPosition(Duration position) {
     if (!_snapshot.isActive || _snapshot.currentTrack == null) return;
     final seconds = position.inMilliseconds / 1000;
-    if (seconds >= previewSeconds &&
-        _snapshot.status == TwistPlaybackStatus.playing) {
+    if (seconds >= previewSeconds && _snapshot.status == TwistPlaybackStatus.playing) {
       unawaited(_guard(() => _backend.pause()));
       unawaited(_onPreviewCompleted());
       return;
     }
-    _emit(_snapshot.copyWith(
-        progressSeconds: seconds.clamp(0.0, previewSeconds).toDouble()));
+    _emit(_snapshot.copyWith(progressSeconds: seconds.clamp(0.0, previewSeconds).toDouble()));
     unawaited(_maybeTriggerIntervalPrompt());
   }
 

@@ -65,10 +65,9 @@ class FakeBackend implements PlaybackBackend {
   }
 
   Future<void> emitReady() => _emit(() => _states.add(PlaybackBackendState.ready));
-  Future<void> emitCompleted() =>
-      _emit(() => _states.add(PlaybackBackendState.completed));
-  Future<void> emitPosition(double seconds) => _emit(
-      () => _positions.add(Duration(milliseconds: (seconds * 1000).round())));
+  Future<void> emitCompleted() => _emit(() => _states.add(PlaybackBackendState.completed));
+  Future<void> emitPosition(double seconds) =>
+      _emit(() => _positions.add(Duration(milliseconds: (seconds * 1000).round())));
   Future<void> emitError(Object error) => _emit(() => _errors.add(error));
 
   Future<void> _emit(void Function() action) async {
@@ -143,8 +142,7 @@ TwistTrack track(int id, {String? title}) => TwistTrack(
 
 List<TwistTrack> tracks(int count) => [for (var i = 1; i <= count; i++) track(i)];
 
-TwistLane lane(int count, {String? title, TwistDownloadPromptPolicy? policy}) =>
-    TwistLane(
+TwistLane lane(int count, {String? title, TwistDownloadPromptPolicy? policy}) => TwistLane(
       title: title ?? 'Hot Lane',
       subTitle: 'Promoted',
       downloadUrl: 'https://twist.example.com/get',
@@ -172,8 +170,7 @@ class CountingLaneSource implements TwistLaneSource {
 class AnalyticsRecorder {
   final List<(String, Map<String, Object>)> events = [];
 
-  void call(String name, Map<String, Object> parameters) =>
-      events.add((name, parameters));
+  void call(String name, Map<String, Object> parameters) => events.add((name, parameters));
 
   List<String> get names => [for (final e in events) e.$1];
 

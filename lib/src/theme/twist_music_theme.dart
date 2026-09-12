@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+import 'twist_colors.dart';
+
 /// Host-overridable styling for the swimlane and the mini player.
 ///
-/// Register it as a [ThemeExtension] on the host theme to override any token;
-/// otherwise [TwistMusicTheme.of] derives sensible values from
-/// [ThemeData.textTheme] and [ThemeData.colorScheme].
+/// Register it as a [ThemeExtension] on the host theme to override any token.
+/// The lane defaults to the dark Twist look on every host; the mini player
+/// follows [ThemeData.colorScheme] unless overridden.
 class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
   const TwistMusicTheme({
+    this.laneBackground,
     this.headerTitleStyle,
     this.headerSubtitleStyle,
     this.cardTitleStyle,
@@ -18,6 +21,8 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     this.promptAccent,
   });
 
+  /// Fill behind the lane's header and carousel.
+  final Color? laneBackground;
   final TextStyle? headerTitleStyle;
   final TextStyle? headerSubtitleStyle;
   final TextStyle? cardTitleStyle;
@@ -38,25 +43,27 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     final text = theme.textTheme;
     final scheme = theme.colorScheme;
     final defaults = TwistMusicTheme(
+      laneBackground: TwistColors.laneBackground,
       headerTitleStyle: (text.titleLarge ?? const TextStyle(fontSize: 20))
-          .copyWith(fontWeight: FontWeight.w700, color: scheme.onSurface),
+          .copyWith(fontWeight: FontWeight.w700, color: TwistColors.onDark),
       headerSubtitleStyle: (text.bodySmall ?? const TextStyle(fontSize: 13))
-          .copyWith(color: scheme.onSurfaceVariant),
-      cardTitleStyle: (text.titleSmall ?? const TextStyle(fontSize: 16))
-          .copyWith(fontWeight: FontWeight.w700, color: scheme.onSurface),
-      cardArtistStyle: (text.bodySmall ?? const TextStyle(fontSize: 13))
-          .copyWith(color: scheme.onSurfaceVariant),
+          .copyWith(color: TwistColors.onDarkMuted),
+      cardTitleStyle: (text.titleLarge ?? const TextStyle(fontSize: 20))
+          .copyWith(fontWeight: FontWeight.w700, color: TwistColors.onDark),
+      cardArtistStyle: (text.bodyMedium ?? const TextStyle(fontSize: 14))
+          .copyWith(color: TwistColors.onDarkSoft),
       miniPlayerTitleStyle: (text.bodyMedium ?? const TextStyle(fontSize: 14))
           .copyWith(fontWeight: FontWeight.w600, color: scheme.onSurface),
       miniPlayerBackground: scheme.surface.withValues(alpha: 0.72),
       miniPlayerForeground: scheme.onSurface,
-      artworkPlaceholder: scheme.surfaceContainerHighest,
-      promptAccent: scheme.primary,
+      artworkPlaceholder: TwistColors.artworkPlaceholderDark,
+      promptAccent: TwistColors.accent,
     );
     return override == null ? defaults : defaults.merge(override);
   }
 
   TwistMusicTheme merge(TwistMusicTheme other) => TwistMusicTheme(
+        laneBackground: other.laneBackground ?? laneBackground,
         headerTitleStyle: other.headerTitleStyle ?? headerTitleStyle,
         headerSubtitleStyle: other.headerSubtitleStyle ?? headerSubtitleStyle,
         cardTitleStyle: other.cardTitleStyle ?? cardTitleStyle,
@@ -70,6 +77,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
 
   @override
   TwistMusicTheme copyWith({
+    Color? laneBackground,
     TextStyle? headerTitleStyle,
     TextStyle? headerSubtitleStyle,
     TextStyle? cardTitleStyle,
@@ -81,6 +89,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     Color? promptAccent,
   }) =>
       TwistMusicTheme(
+        laneBackground: laneBackground ?? this.laneBackground,
         headerTitleStyle: headerTitleStyle ?? this.headerTitleStyle,
         headerSubtitleStyle: headerSubtitleStyle ?? this.headerSubtitleStyle,
         cardTitleStyle: cardTitleStyle ?? this.cardTitleStyle,
@@ -96,17 +105,14 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
   TwistMusicTheme lerp(ThemeExtension<TwistMusicTheme>? other, double t) {
     if (other is! TwistMusicTheme) return this;
     return TwistMusicTheme(
+      laneBackground: Color.lerp(laneBackground, other.laneBackground, t),
       headerTitleStyle: TextStyle.lerp(headerTitleStyle, other.headerTitleStyle, t),
-      headerSubtitleStyle:
-          TextStyle.lerp(headerSubtitleStyle, other.headerSubtitleStyle, t),
+      headerSubtitleStyle: TextStyle.lerp(headerSubtitleStyle, other.headerSubtitleStyle, t),
       cardTitleStyle: TextStyle.lerp(cardTitleStyle, other.cardTitleStyle, t),
       cardArtistStyle: TextStyle.lerp(cardArtistStyle, other.cardArtistStyle, t),
-      miniPlayerTitleStyle:
-          TextStyle.lerp(miniPlayerTitleStyle, other.miniPlayerTitleStyle, t),
-      miniPlayerBackground:
-          Color.lerp(miniPlayerBackground, other.miniPlayerBackground, t),
-      miniPlayerForeground:
-          Color.lerp(miniPlayerForeground, other.miniPlayerForeground, t),
+      miniPlayerTitleStyle: TextStyle.lerp(miniPlayerTitleStyle, other.miniPlayerTitleStyle, t),
+      miniPlayerBackground: Color.lerp(miniPlayerBackground, other.miniPlayerBackground, t),
+      miniPlayerForeground: Color.lerp(miniPlayerForeground, other.miniPlayerForeground, t),
       artworkPlaceholder: Color.lerp(artworkPlaceholder, other.artworkPlaceholder, t),
       promptAccent: Color.lerp(promptAccent, other.promptAccent, t),
     );

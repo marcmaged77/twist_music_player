@@ -4,9 +4,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:twist_music_player/twist_music_player.dart';
 
-Map<String, dynamic> fixture() => jsonDecode(
-        File('test/fixtures/tracks_en.json').readAsStringSync())
-    as Map<String, dynamic>;
+Map<String, dynamic> fixture() =>
+    jsonDecode(File('test/fixtures/tracks_en.json').readAsStringSync()) as Map<String, dynamic>;
 
 void main() {
   group('TwistLaneParser with the live fixture', () {
@@ -100,10 +99,10 @@ void main() {
     });
 
     test('falls back to the default prompt policy when absent or partial', () {
-      expect(TwistLaneParser.parse(envelope([])).downloadPrompt,
-          TwistDownloadPromptPolicy.fallback);
-      final partial = TwistLaneParser.parse(
-          envelope([], prompt: {'maxCount': -3, 'intervalSeconds': 0}));
+      expect(
+          TwistLaneParser.parse(envelope([])).downloadPrompt, TwistDownloadPromptPolicy.fallback);
+      final partial =
+          TwistLaneParser.parse(envelope([], prompt: {'maxCount': -3, 'intervalSeconds': 0}));
       expect(partial.downloadPrompt.isEnabled, isTrue);
       expect(partial.downloadPrompt.maxCount, 0);
       expect(partial.downloadPrompt.isActive, isFalse);

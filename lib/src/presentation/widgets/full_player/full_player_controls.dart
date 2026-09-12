@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../l10n/twist_strings.dart';
 import '../../../theme/twist_colors.dart';
+import '../twist_play_pause_icon.dart';
 
 /// Previous, the 72-pt play/pause disc, next.
 class FullPlayerControls extends StatelessWidget {
@@ -34,7 +36,7 @@ class FullPlayerControls extends StatelessWidget {
         _SideButton(
           identifier: 'twistMusic_fullPlayerPreviousBtn',
           label: strings.previousTrack,
-          icon: Icons.skip_previous_rounded,
+          icon: Iconsax.previous5,
           color: sideColor,
           onPressed: hasTrack ? onPrevious : null,
         ),
@@ -60,10 +62,9 @@ class FullPlayerControls extends StatelessWidget {
                       padding: EdgeInsets.all(24),
                       child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.black),
                     )
-                  : Icon(
-                      isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-                      size: 36,
-                      color: Colors.black,
+                  : Center(
+                      child:
+                          TwistPlayPauseIcon(isPlaying: isPlaying, size: 30, color: Colors.black),
                     ),
             ),
           ),
@@ -72,7 +73,7 @@ class FullPlayerControls extends StatelessWidget {
         _SideButton(
           identifier: 'twistMusic_fullPlayerNextBtn',
           label: strings.nextTrack,
-          icon: Icons.skip_next_rounded,
+          icon: Iconsax.next5,
           color: sideColor,
           onPressed: hasTrack ? onNext : null,
         ),
@@ -111,7 +112,7 @@ class _SideButton extends StatelessWidget {
         child: IconButton(
           padding: EdgeInsets.zero,
           onPressed: onPressed,
-          icon: Icon(icon, size: 32, color: color),
+          icon: Icon(icon, size: 28, color: color),
         ),
       ),
     );

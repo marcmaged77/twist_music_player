@@ -8,8 +8,7 @@
 library;
 
 // Public surface. Anything not exported here is internal.
-export 'src/analytics/twist_analytics.dart'
-    show TwistAnalyticsEvents, TwistAnalyticsSources;
+export 'src/analytics/twist_analytics.dart' show TwistAnalyticsEvents, TwistAnalyticsSources;
 export 'src/config/twist_download_prompt_policy.dart';
 export 'src/config/twist_music_config.dart';
 export 'src/data/lane/twist_lane_parser.dart';

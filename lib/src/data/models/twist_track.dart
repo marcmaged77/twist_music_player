@@ -32,16 +32,13 @@ class TwistTrack {
   final int fullDurationSeconds;
 
   /// Full player, swimlane cards and the mini player.
-  Uri? get preferredFullArtworkUrl =>
-      artworkLargeUrl ?? artworkMediumUrl ?? artworkSmallUrl;
+  Uri? get preferredFullArtworkUrl => artworkLargeUrl ?? artworkMediumUrl ?? artworkSmallUrl;
 
   /// Queue rows.
-  Uri? get preferredCompactArtworkUrl =>
-      artworkMediumUrl ?? artworkSmallUrl ?? artworkLargeUrl;
+  Uri? get preferredCompactArtworkUrl => artworkMediumUrl ?? artworkSmallUrl ?? artworkLargeUrl;
 
   /// Lock screen and notification.
-  Uri? get preferredLockScreenArtworkUrl =>
-      artworkSmallUrl ?? artworkMediumUrl ?? artworkLargeUrl;
+  Uri? get preferredLockScreenArtworkUrl => artworkSmallUrl ?? artworkMediumUrl ?? artworkLargeUrl;
 
   @override
   bool operator ==(Object other) =>
@@ -57,8 +54,8 @@ class TwistTrack {
       other.fullDurationSeconds == fullDurationSeconds;
 
   @override
-  int get hashCode => Object.hash(id, title, artistName, albumTitle, previewUrl,
-      artworkSmallUrl, artworkMediumUrl, artworkLargeUrl, fullDurationSeconds);
+  int get hashCode => Object.hash(id, title, artistName, albumTitle, previewUrl, artworkSmallUrl,
+      artworkMediumUrl, artworkLargeUrl, fullDurationSeconds);
 
   @override
   String toString() => 'TwistTrack($id, $title, $artistName)';

@@ -73,8 +73,7 @@ class TwistAnalytics {
         'source': source,
       });
 
-  void downloadPromptAction(TwistTrack track,
-          {required String action, required String source}) =>
+  void downloadPromptAction(TwistTrack track, {required String action, required String source}) =>
       _send(TwistAnalyticsEvents.downloadPromptAction, {
         'action': action,
         'label': track.title,

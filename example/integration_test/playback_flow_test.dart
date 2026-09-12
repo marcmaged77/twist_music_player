@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:twist_music_player/twist_music_player.dart';
 import 'package:twist_music_player_example/main.dart' as app;
@@ -34,7 +34,7 @@ void main() {
     expect(player.engine.snapshot.progressSeconds, greaterThan(0));
     expect(player.isFullPlayerOpen, isTrue);
 
-    await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+    await tester.tap(find.byIcon(Iconsax.arrow_down_1));
     await _waitUntil(tester, () => !player.isFullPlayerOpen, const Duration(seconds: 5));
     await tester.pump(const Duration(seconds: 3));
     expect(find.byType(TwistMiniPlayerContent), findsOneWidget);
@@ -64,8 +64,7 @@ void main() {
 Future<void> _waitFor(WidgetTester tester, Finder finder, Duration timeout) =>
     _waitUntil(tester, () => finder.evaluate().isNotEmpty, timeout);
 
-Future<void> _waitUntil(
-    WidgetTester tester, bool Function() condition, Duration timeout) async {
+Future<void> _waitUntil(WidgetTester tester, bool Function() condition, Duration timeout) async {
   final deadline = DateTime.now().add(timeout);
   while (!condition()) {
     if (DateTime.now().isAfter(deadline)) {

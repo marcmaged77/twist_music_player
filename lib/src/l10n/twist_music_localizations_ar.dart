@@ -60,8 +60,7 @@ class TwistMusicLocalizationsAr extends TwistMusicLocalizations {
   String get downloadPromptTitle => 'عايز تستمتع بالتجربة كاملة؟';
 
   @override
-  String get downloadPromptSubtitle =>
-      'حمل تطبيق twist و اسمع ملايين الاغاني بدون حدود';
+  String get downloadPromptSubtitle => 'حمل تطبيق twist و اسمع ملايين الاغاني بدون حدود';
 
   @override
   String get downloadPromptCta => 'حمّل Twist';

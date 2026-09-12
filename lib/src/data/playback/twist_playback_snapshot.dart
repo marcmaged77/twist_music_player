@@ -10,9 +10,7 @@ class TwistDownloadPromptRequest {
 
   @override
   bool operator ==(Object other) =>
-      other is TwistDownloadPromptRequest &&
-      other.reason == reason &&
-      other.track == track;
+      other is TwistDownloadPromptRequest && other.reason == reason && other.track == track;
 
   @override
   int get hashCode => Object.hash(reason, track);
@@ -69,19 +67,16 @@ class TwistPlaybackSnapshot {
     return TwistPlaybackSnapshot(
       status: status ?? this.status,
       errorMessage: errorMessage == _unset ? this.errorMessage : errorMessage as String?,
-      currentTrack:
-          currentTrack == _unset ? this.currentTrack : currentTrack as TwistTrack?,
+      currentTrack: currentTrack == _unset ? this.currentTrack : currentTrack as TwistTrack?,
       queue: queue ?? this.queue,
       queueIndex: queueIndex ?? this.queueIndex,
       progressSeconds: progressSeconds ?? this.progressSeconds,
       laneTitle: laneTitle == _unset ? this.laneTitle : laneTitle as String?,
-      laneSubTitle:
-          laneSubTitle == _unset ? this.laneSubTitle : laneSubTitle as String?,
+      laneSubTitle: laneSubTitle == _unset ? this.laneSubTitle : laneSubTitle as String?,
       pendingDownloadPrompt: pendingDownloadPrompt == _unset
           ? this.pendingDownloadPrompt
           : pendingDownloadPrompt as TwistDownloadPromptRequest?,
-      pendingExpansionRequest:
-          pendingExpansionRequest ?? this.pendingExpansionRequest,
+      pendingExpansionRequest: pendingExpansionRequest ?? this.pendingExpansionRequest,
     );
   }
 

@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../data/playback/twist_playback_snapshot.dart';
+import '../../analytics/twist_analytics.dart';
 import '../../twist_music_player_impl.dart';
 import '../widgets/full_player/full_player_body.dart';
 import '../widgets/full_player/full_player_queue_sheet.dart';
 
 /// Slide-up route hosting [TwistFullPlayerScreen], used when no
-/// [TwistPlayerHost] is mounted. Pops with a [TwistDownloadPromptRequest]
-/// when a prompt becomes due while open.
+/// [TwistPlayerHost] is mounted.
 class TwistFullPlayerRoute extends PageRouteBuilder<Object?> {
   TwistFullPlayerRoute()
       : super(
@@ -61,7 +60,11 @@ class _TwistFullPlayerScreenState extends State<TwistFullPlayerScreen> {
     }
     final prompt = snapshot.pendingDownloadPrompt;
     if (prompt != null && _player.claimDownloadPrompt(prompt)) {
-      _pop(prompt);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _player.presentDownloadPrompt(context, prompt,
+            source: TwistAnalyticsSources.promptFullScreen);
+      });
     }
   }
 
@@ -101,8 +104,7 @@ class _TwistFullPlayerScreenState extends State<TwistFullPlayerScreen> {
     if (track != null) {
       _player.analytics.queueOpened(track, queueCount: snapshot.queue.length);
     }
-    await showTwistQueueSheet(context,
-        background: _player.artworkPalette.value.backgroundTop);
+    await showTwistQueueSheet(context, background: _player.artworkPalette.value.backgroundTop);
   }
 
   @override

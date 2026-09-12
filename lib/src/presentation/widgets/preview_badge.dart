@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../l10n/twist_strings.dart';
 import 'equalizer_bars.dart';
@@ -22,7 +23,7 @@ class PreviewBadge extends StatelessWidget {
           child: Center(
             child: isPlaying
                 ? EqualizerBars(barWidth: 2.5, maxHeight: 11, minHeight: 3, color: color)
-                : Icon(Icons.play_arrow_rounded, size: 12, color: color),
+                : Icon(Iconsax.play5, size: 11, color: color),
           ),
         ),
         const SizedBox(width: 5),

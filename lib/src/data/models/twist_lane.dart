@@ -28,6 +28,5 @@ class TwistLane {
   bool get isNotEmpty => tracks.isNotEmpty;
 
   @override
-  String toString() =>
-      'TwistLane(${tracks.length} tracks, title: $title, prompt: $downloadPrompt)';
+  String toString() => 'TwistLane(${tracks.length} tracks, title: $title, prompt: $downloadPrompt)';
 }

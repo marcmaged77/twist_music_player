@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../data/playback/twist_playback_snapshot.dart';
 import '../../data/playback/twist_playback_status.dart';
@@ -9,6 +10,7 @@ import '../../theme/twist_music_theme.dart';
 import '../../twist_music_player_impl.dart';
 import 'preview_badge.dart';
 import 'twist_artwork.dart';
+import 'twist_play_pause_icon.dart';
 import 'twist_prompt_listener.dart';
 
 /// The 56-pt capsule: artwork, title, preview badge, play/pause and close.
@@ -125,17 +127,13 @@ class TwistMiniPlayerContent extends StatelessWidget {
             _MiniButton(
               identifier: 'twistMusic_miniPlayerPlayPauseBtn',
               label: snapshot.isPlaying ? strings.pauseAction : strings.playAction,
-              icon: snapshot.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              size: 24,
-              color: foreground,
+              icon: TwistPlayPauseIcon(isPlaying: snapshot.isPlaying, size: 22, color: foreground),
               onPressed: loading ? null : player.controller.togglePlayPause,
             ),
             _MiniButton(
               identifier: 'twistMusic_miniPlayerCloseBtn',
               label: strings.miniPlayerClose,
-              icon: Icons.close_rounded,
-              size: 18,
-              color: foreground.withValues(alpha: 0.6),
+              icon: Icon(Iconsax.close_circle, size: 20, color: foreground.withValues(alpha: 0.6)),
               onPressed: player.controller.stop,
             ),
           ],
@@ -150,16 +148,12 @@ class _MiniButton extends StatelessWidget {
     required this.identifier,
     required this.label,
     required this.icon,
-    required this.size,
-    required this.color,
     required this.onPressed,
   });
 
   final String identifier;
   final String label;
-  final IconData icon;
-  final double size;
-  final Color color;
+  final Widget icon;
   final VoidCallback? onPressed;
 
   @override
@@ -177,7 +171,7 @@ class _MiniButton extends StatelessWidget {
         child: IconButton(
           padding: EdgeInsets.zero,
           onPressed: onPressed,
-          icon: Icon(icon, size: size, color: color),
+          icon: icon,
         ),
       ),
     );

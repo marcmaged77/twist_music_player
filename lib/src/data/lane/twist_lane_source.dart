@@ -50,15 +50,12 @@ class HttpTwistLaneSource implements TwistLaneSource {
   Future<TwistLane> load() async {
     final client = _client ?? http.Client();
     try {
-      final response = await client
-          .get(endpoint, headers: {
-            'Accept': 'application/json',
-            ...?headers?.call(),
-          })
-          .timeout(timeout);
+      final response = await client.get(endpoint, headers: {
+        'Accept': 'application/json',
+        ...?headers?.call(),
+      }).timeout(timeout);
       if (response.statusCode < 200 || response.statusCode >= 300) {
-        throw TwistLaneException('Unexpected status',
-            statusCode: response.statusCode);
+        throw TwistLaneException('Unexpected status', statusCode: response.statusCode);
       }
       final decoded = jsonDecode(utf8.decode(response.bodyBytes));
       if (decoded is! Map<String, dynamic>) {

@@ -31,9 +31,7 @@ class ArtworkPalette {
 
   @override
   bool operator ==(Object other) =>
-      other is ArtworkPalette &&
-      other.primary == primary &&
-      other.secondary == secondary;
+      other is ArtworkPalette && other.primary == primary && other.secondary == secondary;
 
   @override
   int get hashCode => Object.hash(primary, secondary);
@@ -58,8 +56,7 @@ ArtworkPalette paletteFromRgba(Uint8List rgba, int width, int height) {
       final b = rgba[offset + 2] / 255;
       final brightness = _max3(r, g, b);
       if (brightness < 0.05 || brightness > 0.95) continue;
-      final saturation =
-          brightness == 0 ? 0.0 : (brightness - _min3(r, g, b)) / brightness;
+      final saturation = brightness == 0 ? 0.0 : (brightness - _min3(r, g, b)) / brightness;
       if (saturation < 0.1 && brightness > 0.3) continue;
       _Bucket? match;
       for (final bucket in buckets) {
@@ -120,8 +117,8 @@ class _Bucket {
 
   double distanceToBucket(_Bucket other) => distanceTo(other._r, other._g, other._b);
 
-  Color get color => Color.fromARGB(
-      255, (_r * 255).round(), (_g * 255).round(), (_b * 255).round());
+  Color get color =>
+      Color.fromARGB(255, (_r * 255).round(), (_g * 255).round(), (_b * 255).round());
 }
 
 double _max3(double a, double b, double c) => a > b ? (a > c ? a : c) : (b > c ? b : c);

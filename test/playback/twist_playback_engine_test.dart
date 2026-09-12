@@ -9,8 +9,7 @@ void main() {
   late TwistPlaybackEngine engine;
   final errors = <Object>[];
 
-  TwistPlaybackEngine build({TwistDownloadPromptPolicy? policy}) =>
-      TwistPlaybackEngine(
+  TwistPlaybackEngine build({TwistDownloadPromptPolicy? policy}) => TwistPlaybackEngine(
         backend: backend,
         session: session,
         promptPolicy: policy ?? TwistDownloadPromptPolicy.fallback,
@@ -288,8 +287,8 @@ void main() {
       final queue = tracks(3);
       await playAndReady(queue[0], queue);
       await engine.selectFromQueue(queue[2]);
-      expect(engine.snapshot.pendingDownloadPrompt?.reason,
-          TwistDownloadPromptReason.queueSelection);
+      expect(
+          engine.snapshot.pendingDownloadPrompt?.reason, TwistDownloadPromptReason.queueSelection);
       expect(engine.snapshot.currentTrack, queue[0]);
 
       await engine.resolveDownloadPrompt(didDownload: false);

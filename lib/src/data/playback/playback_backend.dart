@@ -24,7 +24,9 @@ abstract class PlaybackBackend {
 
 /// An audio-focus interruption from the platform.
 class PlaybackInterruption {
-  const PlaybackInterruption.began() : began = true, shouldResume = false;
+  const PlaybackInterruption.began()
+      : began = true,
+        shouldResume = false;
   const PlaybackInterruption.ended({required this.shouldResume}) : began = false;
 
   final bool began;

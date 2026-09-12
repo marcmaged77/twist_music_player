@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:twist_music_player/twist_music_player.dart';
 
 import '../helpers/fakes.dart';
@@ -21,9 +22,9 @@ void main() {
 
       await setup.backend.emitReady();
       await tester.pump();
-      expect(find.byIcon(Icons.pause_rounded), findsOneWidget);
+      expect(find.byIcon(Iconsax.pause5), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.tap(find.byIcon(Iconsax.close_circle));
       await tester.pump();
       expect(find.text('Track 1'), findsNothing);
       expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.idle);
@@ -36,14 +37,14 @@ void main() {
       await tester.pump();
 
       final playButton = find.ancestor(
-        of: find.byIcon(Icons.play_arrow_rounded).last,
+        of: find.byIcon(Iconsax.play5).last,
         matching: find.byType(IconButton),
       );
       expect(tester.widget<IconButton>(playButton).onPressed, isNull);
 
       await setup.backend.emitReady();
       await tester.pump();
-      await tester.tap(find.byIcon(Icons.pause_rounded));
+      await tester.tap(find.byIcon(Iconsax.pause5));
       await tester.pump();
       expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.paused);
 
@@ -65,7 +66,7 @@ void main() {
       expect(find.text('Artist 1'), findsOneWidget);
       expect(setup.analytics.paramsOf(TwistAnalyticsEvents.playerExpanded)?['action'], 'tap');
 
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+      await tester.tap(find.byIcon(Iconsax.arrow_down_1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(setup.player.isFullPlayerOpen, isFalse);
@@ -131,7 +132,7 @@ void main() {
 
       await tester.tap(find.descendant(
         of: find.byType(TwistMiniPlayerContent),
-        matching: find.byIcon(Icons.pause_rounded),
+        matching: find.byIcon(Iconsax.pause5),
       ));
       await tester.pump();
       expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.paused);
@@ -167,7 +168,7 @@ void main() {
       expect(find.byType(TwistMiniPlayerContent), findsNothing);
       expect(find.text('PLAYING FROM TWIST MUSIC'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.keyboard_arrow_down_rounded));
+      await tester.tap(find.byIcon(Iconsax.arrow_down_1));
       await tester.pump();
       expect(setup.player.isFullPlayerOpen, isFalse);
       await tester.pump(const Duration(milliseconds: 700));
@@ -193,7 +194,7 @@ void main() {
       expect(find.byType(TwistMiniPlayerContent), findsNothing);
     });
 
-    testWidgets('a prompt due while expanded collapses the player first', (tester) async {
+    testWidgets('a prompt due while expanded shows over the player', (tester) async {
       final setup = await initTestPlayer();
       await pumpTestApp(
         tester,
@@ -214,17 +215,13 @@ void main() {
       expect(setup.player.isFullPlayerOpen, isTrue);
       expect(find.byType(TwistMiniPlayerContent), findsNothing);
 
-      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.tap(find.byIcon(Iconsax.next5));
       await tester.pump();
       expect(setup.player.engine.snapshot.pendingDownloadPrompt?.reason,
           TwistDownloadPromptReason.skip);
-      // Collapse spring (two frames), the 120 ms breather, then the sheet slide.
-      await tester.pump(const Duration(milliseconds: 700));
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
-      await tester.pump(const Duration(milliseconds: 200));
-      await tester.pump(const Duration(milliseconds: 400));
-      expect(setup.player.isFullPlayerOpen, isFalse);
+      expect(setup.player.isFullPlayerOpen, isTrue);
       expect(find.text('Download Twist'), findsOneWidget);
       expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadPromptShown)?['source'],
           'prompt_full_screen');
@@ -233,9 +230,13 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       expect(setup.player.engine.snapshot.queueIndex, 1);
+      expect(setup.player.isFullPlayerOpen, isTrue);
+      expect(find.text('Download Twist'), findsNothing);
 
       await setup.player.stop();
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(setup.player.isFullPlayerOpen, isFalse);
     });
   });
 
@@ -260,7 +261,7 @@ void main() {
       final direction = Directionality.of(tester.element(find.text('Track 1')));
       expect(direction, TextDirection.ltr);
 
-      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.tap(find.byIcon(Iconsax.next5));
       await tester.pump();
       expect(setup.player.engine.snapshot.pendingDownloadPrompt?.reason,
           TwistDownloadPromptReason.skip);
@@ -296,7 +297,7 @@ void main() {
       expect(find.text('Track 1'), findsNothing);
     });
 
-    testWidgets('a due prompt collapses the full player, then shows the sheet', (tester) async {
+    testWidgets('a due prompt shows the sheet over the full player', (tester) async {
       final setup = await initTestPlayer();
       await setup.player.engine.play(track(1), queue: tracks(2));
       await setup.backend.emitReady();
@@ -312,7 +313,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      await tester.tap(find.byIcon(Icons.skip_next_rounded));
+      await tester.tap(find.byIcon(Iconsax.next5));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
       await tester.pump(const Duration(milliseconds: 400));
@@ -323,12 +324,15 @@ void main() {
       await tester.tap(find.text('Not now'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
-      await opening;
       expect(setup.player.engine.snapshot.queueIndex, 1);
-      expect(setup.player.isFullPlayerOpen, isFalse);
+      expect(setup.player.isFullPlayerOpen, isTrue);
+      expect(find.text('Track 2'), findsOneWidget);
 
       await setup.player.stop();
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await opening;
+      expect(setup.player.isFullPlayerOpen, isFalse);
     });
   });
 

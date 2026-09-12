@@ -4,8 +4,7 @@ import '../data/lane/twist_lane_source.dart';
 import 'twist_download_prompt_policy.dart';
 
 /// Receives every analytics event with its native name and parameters.
-typedef TwistAnalyticsCallback = void Function(
-    String name, Map<String, Object> parameters);
+typedef TwistAnalyticsCallback = void Function(String name, Map<String, Object> parameters);
 
 /// Receives lane and playback failures.
 typedef TwistErrorCallback = void Function(Object error, StackTrace stack);

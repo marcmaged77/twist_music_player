@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/models/twist_track.dart';
 import '../../l10n/twist_strings.dart';
+import '../../theme/twist_music_theme.dart';
 import '../../twist_music_player_impl.dart';
 import '../controllers/twist_lane_controller.dart';
 import 'swimlane/peek_carousel.dart';
@@ -10,7 +11,8 @@ import 'swimlane/swimlane_skeleton.dart';
 import 'swimlane/track_card.dart';
 import 'twist_prompt_listener.dart';
 
-/// The promotional lane: header, peek carousel of preview cards, badges.
+/// The promotional lane: header and an endless peek carousel of artwork
+/// cards on a dark band, as in the Twist app.
 ///
 /// Loads the shared lane on first appearance. The host decides where it goes;
 /// [loadingBuilder] and [emptyBuilder] decide what shows while loading and
@@ -21,20 +23,29 @@ class TwistMusicSwimlane extends StatefulWidget {
     this.onContentAvailabilityChanged,
     this.loadingBuilder,
     this.emptyBuilder,
-    this.cardWidth = 248,
+    this.cardWidth,
+    this.backgroundColor,
     this.autoScrollInterval = const Duration(seconds: 4),
-    this.padding = const EdgeInsets.only(top: 12, bottom: 16),
+    this.padding = const EdgeInsets.only(top: 16, bottom: 20),
   });
 
   /// Fires with true once at least one track is loaded, false otherwise.
   final ValueChanged<bool>? onContentAvailabilityChanged;
   final WidgetBuilder? loadingBuilder;
   final WidgetBuilder? emptyBuilder;
-  final double cardWidth;
+
+  /// Square card side. Null sizes it from the width, so the neighbours peek.
+  final double? cardWidth;
+
+  /// Fill behind the lane. Null uses [TwistMusicTheme.laneBackground].
+  final Color? backgroundColor;
 
   /// Null disables auto-advance.
   final Duration? autoScrollInterval;
   final EdgeInsetsGeometry padding;
+
+  /// Card side for a lane [width] pixels wide: 60 % of it, within bounds.
+  static double cardSizeFor(double width) => (width * 0.6).clamp(200.0, 300.0);
 
   @override
   State<TwistMusicSwimlane> createState() => _TwistMusicSwimlaneState();
@@ -95,16 +106,28 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
           case TwistLaneState.idle:
           case TwistLaneState.loading:
             return widget.loadingBuilder?.call(context) ??
-                Padding(
-                  padding: widget.padding,
-                  child: SwimlaneSkeleton(cardWidth: widget.cardWidth),
+                _band(
+                  context,
+                  LayoutBuilder(
+                    builder: (context, constraints) => SwimlaneSkeleton(
+                        cardWidth: widget.cardWidth ??
+                            TwistMusicSwimlane.cardSizeFor(constraints.maxWidth)),
+                  ),
                 );
           case TwistLaneState.empty:
             return widget.emptyBuilder?.call(context) ?? const SizedBox.shrink();
           case TwistLaneState.loaded:
-            return _buildLane(context);
+            return _band(context, _buildLane(context));
         }
       },
+    );
+  }
+
+  Widget _band(BuildContext context, Widget child) {
+    final theme = TwistMusicTheme.of(context);
+    return ColoredBox(
+      color: widget.backgroundColor ?? theme.laneBackground ?? Colors.black,
+      child: Padding(padding: widget.padding, child: child),
     );
   }
 
@@ -114,37 +137,39 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
     final snapshot = _player.controller.value;
     final playingId = snapshot.isPlaying ? snapshot.currentTrack?.id : null;
     return TwistPromptListener(
-      child: Padding(
-        padding: widget.padding,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwimlaneHeader(
-              title: lane.title ?? strings.swimlaneTitle,
-              subtitle: lane.subTitle ?? strings.swimlaneSubtitle,
-              logo: _player.config.branding?.headerLogo,
-            ),
-            const SizedBox(height: 6),
-            SizedBox(
-              height: widget.cardWidth + 48,
-              child: PeekCarousel(
-                itemCount: lane.tracks.length,
-                cardWidth: widget.cardWidth,
-                autoScrollInterval: widget.autoScrollInterval,
-                itemBuilder: (context, index) {
-                  final track = lane.tracks[index];
-                  return TrackCard(
-                    track: track,
-                    artworkSize: widget.cardWidth,
-                    isPlaying: playingId == track.id,
-                    onTap: () => _onTap(track),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SwimlaneHeader(
+            title: lane.title ?? strings.swimlaneTitle,
+            subtitle: lane.subTitle ?? strings.swimlaneSubtitle,
+            logo: _player.config.branding?.headerLogo,
+          ),
+          const SizedBox(height: 14),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
+              return SizedBox(
+                height: size,
+                child: PeekCarousel(
+                  itemCount: lane.tracks.length,
+                  cardWidth: size,
+                  autoScrollInterval: widget.autoScrollInterval,
+                  itemBuilder: (context, index) {
+                    final track = lane.tracks[index];
+                    return TrackCard(
+                      track: track,
+                      size: size,
+                      isPlaying: playingId == track.id,
+                      onTap: () => _onTap(track),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ],
       ),
     );
   }

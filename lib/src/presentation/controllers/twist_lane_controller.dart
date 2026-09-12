@@ -39,8 +39,7 @@ class TwistLaneController extends ChangeNotifier {
   final TwistAnalytics _analytics;
   final TwistErrorCallback? _onError;
 
-  final ValueNotifier<TwistLaneState> _state =
-      ValueNotifier<TwistLaneState>(TwistLaneState.idle);
+  final ValueNotifier<TwistLaneState> _state = ValueNotifier<TwistLaneState>(TwistLaneState.idle);
   TwistLane _lane = TwistLane.empty;
   Future<void>? _inFlight;
   bool _didLogLaneLoaded = false;

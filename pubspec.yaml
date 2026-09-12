@@ -8,6 +8,7 @@ environment:
   flutter: ">=3.27.0"
 
 dependencies:
+  iconsax: ^0.0.8
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -33,3 +34,4 @@ dev_dependencies:
 
 flutter:
   generate: true
+  uses-material-design: true

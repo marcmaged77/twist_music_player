@@ -60,8 +60,7 @@ class TwistMusicLocalizationsEn extends TwistMusicLocalizations {
   String get downloadPromptTitle => 'Want to enjoy the full experience?';
 
   @override
-  String get downloadPromptSubtitle =>
-      'Download Twist app and listen to millions of songs';
+  String get downloadPromptSubtitle => 'Download Twist app and listen to millions of songs';
 
   @override
   String get downloadPromptCta => 'Download Twist';

@@ -45,8 +45,7 @@ class AudioSessionPlaybackController implements PlaybackSessionController {
         if (event.type == AudioInterruptionType.duck) continue;
         yield const PlaybackInterruption.began();
       } else {
-        yield PlaybackInterruption.ended(
-            shouldResume: event.type == AudioInterruptionType.pause);
+        yield PlaybackInterruption.ended(shouldResume: event.type == AudioInterruptionType.pause);
       }
     }
   }

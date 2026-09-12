@@ -38,9 +38,8 @@ class TwistDownloadPromptPolicy {
     return TwistDownloadPromptPolicy(
       isEnabled: enabled is bool ? enabled : fallback.isEnabled,
       maxCount: maxCount is num ? math.max(0, maxCount.toInt()) : fallback.maxCount,
-      intervalSeconds: parsedInterval != null && parsedInterval > 0
-          ? parsedInterval
-          : fallback.intervalSeconds,
+      intervalSeconds:
+          parsedInterval != null && parsedInterval > 0 ? parsedInterval : fallback.intervalSeconds,
     );
   }
 

@@ -47,8 +47,7 @@ class TwistMusicPlayer {
   static TwistMusicPlayer get instance {
     final player = _instance;
     if (player == null) {
-      throw StateError(
-          'TwistMusicPlayer.init() must be called before using the package.');
+      throw StateError('TwistMusicPlayer.init() must be called before using the package.');
     }
     return player;
   }
@@ -167,8 +166,7 @@ class TwistMusicPlayer {
       return;
     }
     try {
-      final palette =
-          await _paletteResolver.resolve(CachedNetworkImageProvider(url.toString()));
+      final palette = await _paletteResolver.resolve(CachedNetworkImageProvider(url.toString()));
       if (_paletteUrl == url && _instance == this) _palette.value = palette;
     } catch (error, stack) {
       config.onError?.call(error, stack);
@@ -217,8 +215,7 @@ class TwistMusicPlayer {
     if (Navigator.maybeOf(context, rootNavigator: true) != null) return context;
     final hosted = TwistPlayerHost.navigatorContextOf(context);
     if (hosted != null) return hosted;
-    throw FlutterError(
-        'twist_music_player: no Navigator found. Place the widget under a '
+    throw FlutterError('twist_music_player: no Navigator found. Place the widget under a '
         'Navigator or inside TwistPlayerHost wrapping the MaterialApp child.');
   }
 
@@ -229,8 +226,7 @@ class TwistMusicPlayer {
 
   /// Expands the player in place when a [TwistPlayerHost] is mounted,
   /// otherwise pushes [TwistFullPlayerRoute] on the root navigator. A
-  /// download prompt raised while the route is open collapses it first and
-  /// the prompt follows, as on iOS.
+  /// download prompt raised while the player is open shows on top of it.
   Future<void> openFullPlayer(BuildContext context, {String? analyticsVia}) async {
     if (isFullPlayerOpen || !engine.snapshot.isActive) return;
     final track = engine.snapshot.currentTrack;
@@ -248,14 +244,7 @@ class TwistMusicPlayer {
     _fullPlayerOpen = true;
     _routeOpened();
     try {
-      final result = await navigator.push<Object?>(TwistFullPlayerRoute());
-      _fullPlayerOpen = false;
-      if (result is TwistDownloadPromptRequest) {
-        await Future<void>.delayed(const Duration(milliseconds: 350));
-        if (!navigator.mounted) return;
-        await presentDownloadPrompt(navigator.context, result,
-            source: TwistAnalyticsSources.promptFullScreen);
-      }
+      await navigator.push<Object?>(TwistFullPlayerRoute());
     } finally {
       _fullPlayerOpen = false;
       _routeClosed();
@@ -275,8 +264,8 @@ class TwistMusicPlayer {
   }
 
   /// Shows the prompt sheet, logs the outcome, opens the download link when
-  /// chosen and resolves the engine. Inside a [TwistPlayerHost] an expanded
-  /// player collapses first, then the sheet rises in the host's layer.
+  /// chosen and resolves the engine. Inside a [TwistPlayerHost] the sheet
+  /// rises in the host's layer, over the expanded player when it is open.
   Future<void> presentDownloadPrompt(
     BuildContext context,
     TwistDownloadPromptRequest request, {
@@ -286,11 +275,7 @@ class TwistMusicPlayer {
     var effectiveSource = source;
     bool didDownload;
     if (surface != null) {
-      if (surface.isExpanded) {
-        effectiveSource = TwistAnalyticsSources.promptFullScreen;
-        await surface.collapse();
-        await Future<void>.delayed(const Duration(milliseconds: 120));
-      }
+      if (surface.isExpanded) effectiveSource = TwistAnalyticsSources.promptFullScreen;
       analytics.downloadPromptShown(request.track, source: effectiveSource);
       didDownload = await surface.showSheet<bool>(
             (_) => const DecoratedBox(

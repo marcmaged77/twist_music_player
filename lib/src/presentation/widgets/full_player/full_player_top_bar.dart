@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../l10n/twist_strings.dart';
 import '../../../theme/twist_colors.dart';
@@ -30,8 +31,7 @@ class FullPlayerTopBar extends StatelessWidget {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: onCollapse,
-                  icon: const Icon(Icons.keyboard_arrow_down_rounded,
-                      size: 24, color: TwistColors.onDark),
+                  icon: const Icon(Iconsax.arrow_down_1, size: 24, color: TwistColors.onDark),
                 ),
               ),
             ),

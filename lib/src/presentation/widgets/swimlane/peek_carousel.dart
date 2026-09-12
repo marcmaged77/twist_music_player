@@ -3,16 +3,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// Centered cards with peeking neighbours, snap-to-center paging, side cards
-/// scaled and faded, and a periodic auto-advance paused while touched.
+/// scaled down, and a periodic auto-advance paused while touched. The lane
+/// wraps around in both directions, so scrolling never hits an end.
 class PeekCarousel extends StatefulWidget {
   const PeekCarousel({
     super.key,
     required this.itemCount,
     required this.itemBuilder,
     this.cardWidth = 248,
-    this.spacing = 16,
+    this.spacing = 2,
     this.sideScale = 0.90,
-    this.sideOpacity = 0.45,
+    this.sideOpacity = 1.0,
     this.autoScrollInterval = const Duration(seconds: 4),
   });
 
@@ -26,6 +27,9 @@ class PeekCarousel extends StatefulWidget {
   /// Null disables auto-advance.
   final Duration? autoScrollInterval;
 
+  /// Pages start this many loops in so the lane can be swiped backwards too.
+  static const int loops = 1000;
+
   @override
   State<PeekCarousel> createState() => _PeekCarouselState();
 }
@@ -33,7 +37,10 @@ class PeekCarousel extends StatefulWidget {
 class _PeekCarouselState extends State<PeekCarousel> {
   PageController? _controller;
   double _fraction = 1;
+  int _itemCount = 0;
   Timer? _timer;
+
+  bool get _wraps => widget.itemCount > 1;
 
   @override
   void initState() {
@@ -60,33 +67,28 @@ class _PeekCarouselState extends State<PeekCarousel> {
   void _scheduleAutoScroll() {
     _timer?.cancel();
     final interval = widget.autoScrollInterval;
-    if (interval == null || widget.itemCount <= 1) return;
+    if (interval == null || !_wraps) return;
     _timer = Timer.periodic(interval, (_) => _advance());
   }
 
   void _advance() {
     final controller = _controller;
     if (controller == null || !controller.hasClients || !mounted) return;
-    final current = controller.page?.round() ?? 0;
-    final next = (current + 1) % widget.itemCount;
-    if (next == 0 && widget.itemCount > 1) {
-      controller.animateToPage(0,
-          duration: const Duration(milliseconds: 450), curve: Curves.easeOut);
-    } else {
-      controller.animateToPage(next,
-          duration: const Duration(milliseconds: 350), curve: Curves.easeOut);
-    }
+    final current = controller.page?.round() ?? controller.initialPage;
+    controller.animateToPage(current + 1,
+        duration: const Duration(milliseconds: 350), curve: Curves.easeOut);
   }
 
   PageController _controllerFor(double viewportWidth) {
-    final fraction =
-        ((widget.cardWidth + widget.spacing) / viewportWidth).clamp(0.2, 1.0);
-    if (_controller == null || fraction != _fraction) {
-      final page = _controller?.hasClients == true ? (_controller!.page ?? 0) : 0.0;
+    final fraction = ((widget.cardWidth + widget.spacing) / viewportWidth).clamp(0.2, 1.0);
+    if (_controller == null || fraction != _fraction || _itemCount != widget.itemCount) {
+      final base = _wraps ? widget.itemCount * PeekCarousel.loops : 0;
+      final page = _controller?.hasClients == true ? (_controller!.page ?? base) : base.toDouble();
+      final keep = _itemCount == widget.itemCount ? page.round() : base;
       _controller?.dispose();
       _fraction = fraction;
-      _controller =
-          PageController(viewportFraction: fraction, initialPage: page.round());
+      _itemCount = widget.itemCount;
+      _controller = PageController(viewportFraction: fraction, initialPage: keep);
     }
     return _controller!;
   }
@@ -102,10 +104,11 @@ class _PeekCarouselState extends State<PeekCarousel> {
           onPointerCancel: (_) => _scheduleAutoScroll(),
           child: PageView.builder(
             controller: controller,
-            itemCount: widget.itemCount,
+            itemCount: _wraps ? null : widget.itemCount,
             clipBehavior: Clip.none,
             physics: const PageScrollPhysics(parent: ClampingScrollPhysics()),
             itemBuilder: (context, index) {
+              final item = _wraps ? index % widget.itemCount : index;
               return AnimatedBuilder(
                 animation: controller,
                 builder: (context, child) {
@@ -126,7 +129,7 @@ class _PeekCarouselState extends State<PeekCarousel> {
                 },
                 child: SizedBox(
                   width: widget.cardWidth,
-                  child: widget.itemBuilder(context, index),
+                  child: widget.itemBuilder(context, item),
                 ),
               );
             },

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../data/models/twist_track.dart';
 import '../../../data/playback/twist_playback_snapshot.dart';
@@ -34,7 +35,7 @@ class FullPlayerQueueButton extends StatelessWidget {
             foregroundColor: TwistColors.onDark,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           ),
-          icon: const Icon(Icons.format_list_bulleted_rounded, size: 18),
+          icon: const Icon(Iconsax.music_playlist, size: 18),
           label: Text(strings.fullPlayerUpNext,
               style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
         ),
@@ -113,8 +114,8 @@ class TwistQueueSheetBody extends StatelessWidget {
                         child: IconButton(
                           padding: EdgeInsets.zero,
                           onPressed: () => TwistSheetScope.closeWith(context, null),
-                          icon: const Icon(Icons.close_rounded,
-                              size: 18, color: Color(0x99FFFFFF)),
+                          icon:
+                              const Icon(Iconsax.close_circle, size: 18, color: Color(0x99FFFFFF)),
                         ),
                       ),
                     ],
@@ -134,8 +135,8 @@ class TwistQueueSheetBody extends StatelessWidget {
                         isPlaying: isCurrent && snapshot.isPlaying,
                         onTap: () {
                           if (current != null) {
-                            player.analytics.queueTrackSelected(
-                                from: current, to: track, position: index + 1);
+                            player.analytics
+                                .queueTrackSelected(from: current, to: track, position: index + 1);
                           }
                           player.controller.selectFromQueue(track);
                         },
@@ -214,8 +215,8 @@ class _QueueRow extends StatelessWidget {
                 SizedBox(
                   width: 24,
                   child: Center(
-                    child: EqualizerBars(
-                        barWidth: 3, maxHeight: 16, minHeight: 4, animate: isPlaying),
+                    child:
+                        EqualizerBars(barWidth: 3, maxHeight: 16, minHeight: 4, animate: isPlaying),
                   ),
                 ),
               ],

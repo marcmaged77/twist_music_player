@@ -26,8 +26,7 @@ class EqualizerBars extends StatefulWidget {
   State<EqualizerBars> createState() => _EqualizerBarsState();
 }
 
-class _EqualizerBarsState extends State<EqualizerBars>
-    with SingleTickerProviderStateMixin {
+class _EqualizerBarsState extends State<EqualizerBars> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 550),

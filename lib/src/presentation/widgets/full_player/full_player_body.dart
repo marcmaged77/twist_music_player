@@ -84,8 +84,8 @@ class TwistFullPlayerBody extends StatelessWidget {
                     const SizedBox(height: 8),
                     FullPlayerPromoCard(
                       logo: branding?.promoLogo,
-                      onGetApp: () => player.openDownloadLink(
-                          source: TwistAnalyticsSources.fullScreenBanner),
+                      onGetApp: () =>
+                          player.openDownloadLink(source: TwistAnalyticsSources.fullScreenBanner),
                     ),
                     Expanded(
                       child: Padding(
