@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:twist_music_player/twist_music_player.dart';
+import 'package:twist_music_player/src/presentation/widgets/twist_play_pause_icon.dart';
 
 import '../helpers/fakes.dart';
 import '../helpers/test_player.dart';
@@ -22,7 +23,7 @@ void main() {
 
       await setup.backend.emitReady();
       await tester.pump();
-      expect(find.byIcon(Iconsax.pause5), findsOneWidget);
+      expect(playPauseIcon(playing: true), findsOneWidget);
 
       await tester.tap(find.byIcon(Iconsax.close_circle));
       await tester.pump();
@@ -37,14 +38,14 @@ void main() {
       await tester.pump();
 
       final playButton = find.ancestor(
-        of: find.byIcon(Iconsax.play5).last,
+        of: playPauseIcon(playing: false).last,
         matching: find.byType(IconButton),
       );
       expect(tester.widget<IconButton>(playButton).onPressed, isNull);
 
       await setup.backend.emitReady();
       await tester.pump();
-      await tester.tap(find.byIcon(Iconsax.pause5));
+      await tester.tap(playPauseIcon(playing: true));
       await tester.pump();
       expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.paused);
 
@@ -132,7 +133,7 @@ void main() {
 
       await tester.tap(find.descendant(
         of: find.byType(TwistMiniPlayerContent),
-        matching: find.byIcon(Iconsax.pause5),
+        matching: playPauseIcon(playing: true),
       ));
       await tester.pump();
       expect(setup.player.engine.snapshot.status, TwistPlaybackStatus.paused);
@@ -367,3 +368,7 @@ void main() {
     });
   });
 }
+
+/// The morphing glyph in its play (false) or pause (true) state.
+Finder playPauseIcon({required bool playing}) =>
+    find.byWidgetPredicate((w) => w is TwistPlayPauseIcon && w.isPlaying == playing);
