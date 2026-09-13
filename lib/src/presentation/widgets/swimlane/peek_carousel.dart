@@ -112,12 +112,12 @@ class _PeekCarouselState extends State<PeekCarousel> {
               return AnimatedBuilder(
                 animation: controller,
                 builder: (context, child) {
-                  double delta = 0;
-                  if (controller.hasClients && controller.position.haveDimensions) {
-                    delta = ((controller.page ?? controller.initialPage.toDouble()) - index)
-                        .abs()
-                        .clamp(0.0, 1.0);
-                  }
+                  // Before the first layout there is no page yet; the initial
+                  // page keeps the neighbours scaled from the very first frame.
+                  final page = controller.hasClients && controller.position.haveDimensions
+                      ? controller.page ?? controller.initialPage.toDouble()
+                      : controller.initialPage.toDouble();
+                  final delta = (page - index).abs().clamp(0.0, 1.0);
                   final scale = 1 - (1 - widget.sideScale) * delta;
                   final opacity = 1 - (1 - widget.sideOpacity) * delta;
                   return Center(

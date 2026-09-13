@@ -6,14 +6,26 @@ import '../../l10n/twist_strings.dart';
 import '../../theme/twist_music_theme.dart';
 import '../../twist_music_player_impl.dart';
 import '../controllers/twist_lane_controller.dart';
+import 'swimlane/banner_band.dart';
 import 'swimlane/peek_carousel.dart';
+import 'swimlane/swimlane_banner.dart';
 import 'swimlane/swimlane_header.dart';
 import 'swimlane/swimlane_skeleton.dart';
 import 'swimlane/track_card.dart';
 import 'twist_prompt_listener.dart';
 
-/// The promotional lane: header and an endless peek carousel of artwork
-/// cards on a dark band, as in the Twist app.
+/// How the lane's header is drawn.
+enum TwistSwimlaneStyle {
+  /// Logo, title and a promo chip on the host's background.
+  plain,
+
+  /// A gradient band with the logo, title, offer text and a download pill;
+  /// the cards overlap the band's bottom edge.
+  banner,
+}
+
+/// The promotional lane: a header and an endless peek carousel of artwork
+/// cards.
 ///
 /// Loads the shared lane on first appearance. The host decides where it goes;
 /// [loadingBuilder] and [emptyBuilder] decide what shows while loading and
@@ -26,6 +38,7 @@ class TwistMusicSwimlane extends StatefulWidget {
     this.emptyBuilder,
     this.cardWidth,
     this.backgroundColor,
+    this.style = TwistSwimlaneStyle.plain,
     this.autoScrollInterval = const Duration(seconds: 4),
     this.padding = const EdgeInsets.only(top: 16, bottom: 20),
   });
@@ -40,6 +53,8 @@ class TwistMusicSwimlane extends StatefulWidget {
 
   /// Fill behind the lane. Null uses [TwistMusicTheme.laneBackground], transparent by default.
   final Color? backgroundColor;
+
+  final TwistSwimlaneStyle style;
 
   /// Null disables auto-advance.
   final Duration? autoScrollInterval;
@@ -111,6 +126,7 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
                   context,
                   LayoutBuilder(
                     builder: (context, constraints) => SwimlaneSkeleton(
+                        banner: widget.style == TwistSwimlaneStyle.banner,
                         cardWidth: widget.cardWidth ??
                             TwistMusicSwimlane.cardSizeFor(constraints.maxWidth)),
                   ),
@@ -135,42 +151,80 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
     final lane = _lane.lane;
     final snapshot = _player.controller.value;
     final playingId = snapshot.isPlaying ? snapshot.currentTrack?.id : null;
+    final branding = _player.config.branding;
+    final title = lane.title ?? strings.swimlaneTitle;
+    final subtitle = lane.subTitle ?? strings.swimlaneSubtitle;
+    void openDownload() => _player.openDownloadLink(source: TwistAnalyticsSources.swimlaneHeader);
     return TwistPromptListener(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SwimlaneHeader(
-            title: lane.title ?? strings.swimlaneTitle,
-            subtitle: lane.subTitle ?? strings.swimlaneSubtitle,
-            logo: _player.config.branding?.headerLogo,
-            onPromoTap: () =>
-                _player.openDownloadLink(source: TwistAnalyticsSources.swimlaneHeader),
-          ),
-          const SizedBox(height: 14),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
-              return SizedBox(
-                height: size,
-                child: PeekCarousel(
-                  itemCount: lane.tracks.length,
-                  cardWidth: size,
-                  autoScrollInterval: widget.autoScrollInterval,
-                  itemBuilder: (context, index) {
-                    final track = lane.tracks[index];
-                    return TrackCard(
-                      track: track,
-                      size: size,
-                      isPlaying: playingId == track.id,
-                      onTap: () => _onTap(track),
-                    );
-                  },
-                ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
+          final carousel = SizedBox(
+            height: size,
+            child: PeekCarousel(
+              itemCount: lane.tracks.length,
+              cardWidth: size,
+              autoScrollInterval: widget.autoScrollInterval,
+              itemBuilder: (context, index) {
+                final track = lane.tracks[index];
+                return TrackCard(
+                  track: track,
+                  size: size,
+                  isPlaying: playingId == track.id,
+                  onTap: () => _onTap(track),
+                );
+              },
+            ),
+          );
+          switch (widget.style) {
+            case TwistSwimlaneStyle.plain:
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SwimlaneHeader(
+                    title: title,
+                    subtitle: subtitle,
+                    logo: branding?.headerLogo,
+                    onPromoTap: openDownload,
+                  ),
+                  const SizedBox(height: 14),
+                  carousel,
+                ],
               );
-            },
-          ),
-        ],
+            case TwistSwimlaneStyle.banner:
+              final theme = TwistMusicTheme.of(context);
+              // The rounded band sits behind the header and the top 40 % of the
+              // cards; the carousel itself runs edge to edge.
+              return Stack(
+                children: [
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    top: 0,
+                    bottom: size * 0.6,
+                    child: BannerBand(gradient: theme.bannerGradient),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SwimlaneBanner(
+                        title: title,
+                        subtitle: subtitle,
+                        ctaLabel: strings.downloadPromptCta,
+                        logo: branding?.promoLogo ?? branding?.headerLogo,
+                        onDownload: openDownload,
+                        padding: const EdgeInsets.fromLTRB(36, 22, 36, 0),
+                      ),
+                      const SizedBox(height: 20),
+                      carousel,
+                    ],
+                  ),
+                ],
+              );
+          }
+        },
       ),
     );
   }

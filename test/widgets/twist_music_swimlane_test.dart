@@ -46,6 +46,23 @@ void main() {
         'swimlane_header');
   });
 
+  testWidgets('the banner style shows the offer text and a download pill', (tester) async {
+    final setup = await initTestPlayer(source: CountingLaneSource(lane(1)));
+    await pumpTestApp(
+      tester,
+      const TwistMusicSwimlane(autoScrollInterval: null, style: TwistSwimlaneStyle.banner),
+    );
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Promoted'), findsOneWidget);
+    expect(find.text('Track 1'), findsOneWidget);
+
+    await tester.tap(find.text('Download Twist'));
+    await tester.pump();
+    expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadClicked)?['source'],
+        'swimlane_header');
+  });
+
   testWidgets('renders the empty builder when the lane is empty', (tester) async {
     await initTestPlayer(source: CountingLaneSource(lane(0)));
     final availability = <bool>[];

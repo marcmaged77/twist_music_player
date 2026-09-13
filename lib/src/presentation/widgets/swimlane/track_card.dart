@@ -36,61 +36,69 @@ class TrackCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(radius),
-          child: SizedBox(
-            width: size,
-            height: size,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                TwistArtwork(
-                  url: track.preferredFullArtworkUrl ?? track.preferredCompactArtworkUrl,
-                  size: size,
-                  radius: 0,
-                  placeholderColor: theme.artworkPlaceholder,
-                ),
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: size * 0.55,
-                  child: const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [Color(0x00000000), TwistColors.cardScrim],
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(radius),
+            boxShadow: const [
+              BoxShadow(color: TwistColors.cardShadow, blurRadius: 14, offset: Offset(0, 6)),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(radius),
+            child: SizedBox(
+              width: size,
+              height: size,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  TwistArtwork(
+                    url: track.preferredFullArtworkUrl ?? track.preferredCompactArtworkUrl,
+                    size: size,
+                    radius: 0,
+                    placeholderColor: theme.artworkPlaceholder,
+                  ),
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    height: size * 0.55,
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Color(0x00000000), TwistColors.cardScrim],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: 12,
-                  top: 12,
-                  child: TrackStatusBadge(isPlaying: isPlaying),
-                ),
-                Positioned(
-                  left: 16,
-                  right: 16,
-                  bottom: 16,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(track.artistName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.cardArtistStyle),
-                      const SizedBox(height: 4),
-                      Text(track.title,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.cardTitleStyle),
-                    ],
+                  Positioned(
+                    left: 12,
+                    top: 12,
+                    child: TrackStatusBadge(isPlaying: isPlaying),
                   ),
-                ),
-              ],
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(track.artistName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.cardArtistStyle),
+                        const SizedBox(height: 4),
+                        Text(track.title,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.cardTitleStyle),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

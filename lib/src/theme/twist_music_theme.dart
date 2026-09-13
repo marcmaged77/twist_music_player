@@ -19,6 +19,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     this.miniPlayerForeground,
     this.artworkPlaceholder,
     this.promptAccent,
+    this.bannerGradient,
   });
 
   /// Fill behind the lane's header and carousel.
@@ -36,6 +37,9 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
 
   /// Accent of the download prompt button and the header promo chip.
   final Color? promptAccent;
+
+  /// Static override of the animated brand band behind the banner header.
+  final Gradient? bannerGradient;
 
   static TwistMusicTheme of(BuildContext context) {
     final theme = Theme.of(context);
@@ -72,6 +76,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
         miniPlayerForeground: other.miniPlayerForeground ?? miniPlayerForeground,
         artworkPlaceholder: other.artworkPlaceholder ?? artworkPlaceholder,
         promptAccent: other.promptAccent ?? promptAccent,
+        bannerGradient: other.bannerGradient ?? bannerGradient,
       );
 
   @override
@@ -86,6 +91,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     Color? miniPlayerForeground,
     Color? artworkPlaceholder,
     Color? promptAccent,
+    Gradient? bannerGradient,
   }) =>
       TwistMusicTheme(
         laneBackground: laneBackground ?? this.laneBackground,
@@ -98,6 +104,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
         miniPlayerForeground: miniPlayerForeground ?? this.miniPlayerForeground,
         artworkPlaceholder: artworkPlaceholder ?? this.artworkPlaceholder,
         promptAccent: promptAccent ?? this.promptAccent,
+        bannerGradient: bannerGradient ?? this.bannerGradient,
       );
 
   @override
@@ -114,6 +121,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
       miniPlayerForeground: Color.lerp(miniPlayerForeground, other.miniPlayerForeground, t),
       artworkPlaceholder: Color.lerp(artworkPlaceholder, other.artworkPlaceholder, t),
       promptAccent: Color.lerp(promptAccent, other.promptAccent, t),
+      bannerGradient: Gradient.lerp(bannerGradient, other.bannerGradient, t),
     );
   }
 }

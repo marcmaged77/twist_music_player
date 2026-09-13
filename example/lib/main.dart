@@ -103,7 +103,7 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.only(bottom: TwistPlayerHost.bottomPaddingOf(context) + 24),
           children: [
             const _FeedCard(title: 'Host content above the lane'),
-            const TwistMusicSwimlane(),
+            const TwistMusicSwimlane(style: TwistSwimlaneStyle.banner),
             const _FeedCard(title: 'Host content below the lane'),
             ValueListenableBuilder<bool>(
               valueListenable: player.isActive,
