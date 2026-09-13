@@ -21,7 +21,7 @@ import 'twist_sheet_scope.dart';
 ///
 /// One surface morphs from the 56-pt bar to the full screen on a spring: the
 /// artwork flies from its 44-pt slot to the full-size slot, the bar's row
-/// fades out and the full player's content fades in, the way the native
+/// fades out and the full player's content fades in, the way a native music
 /// player expands. Sheets (queue, download prompt) render in the same layer,
 /// so nothing ends up under the player. Wrap the `MaterialApp.builder` child.
 class TwistPlayerHost extends StatefulWidget {

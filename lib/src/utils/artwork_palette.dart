@@ -37,9 +37,9 @@ class ArtworkPalette {
   int get hashCode => Object.hash(primary, secondary);
 }
 
-/// Port of the native `ImageColorExtractor`: sample a 40x40 grid, drop near
-/// black, near white and washed-out pixels, bucket by colour distance and keep
-/// the two largest distinct buckets.
+/// Samples a 40x40 grid of the artwork, drops near black, near white and
+/// washed-out pixels, buckets by colour distance and keeps the two largest
+/// distinct buckets.
 ArtworkPalette paletteFromRgba(Uint8List rgba, int width, int height) {
   const grid = 40;
   if (width <= 0 || height <= 0 || rgba.length < width * height * 4) {

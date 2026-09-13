@@ -59,7 +59,7 @@ Future<void> showTwistQueueSheet(BuildContext context, {required Color backgroun
 }
 
 /// Whole lane with the current row highlighted. Stays open after a pick,
-/// as in the native player.
+/// matching the full player.
 class TwistQueueSheetBody extends StatelessWidget {
   const TwistQueueSheetBody({super.key, required this.background});
 

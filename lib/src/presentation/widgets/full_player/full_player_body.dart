@@ -15,7 +15,7 @@ import 'full_player_scrub_bar.dart';
 import 'full_player_top_bar.dart';
 
 /// The full player's content, shared by the route-based screen and the
-/// in-host expansion. Dark and forced left-to-right, as in the native apps.
+/// in-host expansion. Dark and forced left-to-right on every host locale.
 class TwistFullPlayerBody extends StatelessWidget {
   const TwistFullPlayerBody({
     super.key,
@@ -170,7 +170,7 @@ class TwistFullPlayerBody extends StatelessWidget {
 }
 
 /// The darkened artwork gradient behind the full player, over a 15 % black
-/// wash, as in the native player.
+/// wash.
 LinearGradient fullPlayerGradient(ArtworkPalette palette) => LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,

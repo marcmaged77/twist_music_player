@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../config/twist_music_config.dart';
 import '../data/models/twist_track.dart';
 
-/// Event names, identical to the native iOS and Android implementations.
+/// Event names sent to the host's analytics callback.
 abstract final class TwistAnalyticsEvents {
   static const String laneLoaded = 'twist_music_lane_loaded';
   static const String trackTapped = 'twist_music_track_tapped';
@@ -22,7 +22,7 @@ abstract final class TwistAnalyticsSources {
   static const String fullScreenBanner = 'full_screen_banner';
 }
 
-/// Builds the native event payloads and hands them to the host callback.
+/// Builds the event payloads and hands them to the host callback.
 /// A throwing callback is swallowed so it can never affect playback.
 class TwistAnalytics {
   const TwistAnalytics(this._callback);

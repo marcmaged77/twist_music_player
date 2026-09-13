@@ -1,7 +1,7 @@
 import 'package:flutter/painting.dart';
 
 /// Fixed colours of the player chrome. The lane and the full player are dark
-/// regardless of the host theme, as in the native apps.
+/// regardless of the host theme.
 abstract final class TwistColors {
   /// Twist brand blue, sampled from the wordmark.
   static const Color accent = Color(0xFF0017A4);

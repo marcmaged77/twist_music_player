@@ -168,7 +168,7 @@ class TwistPlaybackEngine {
   }
 
   /// Unloads the track and hides the player. The queue and the session
-  /// counters are kept, matching the native behaviour.
+  /// counters are kept for the rest of the session.
   Future<void> stop() async {
     _loadGeneration++;
     await _guard(() => _backend.stop());

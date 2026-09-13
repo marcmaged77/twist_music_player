@@ -40,7 +40,7 @@ void main() {
       }
     });
 
-    test('artwork preferences follow the native order', () {
+    test('artwork preferences prefer the larger sizes', () {
       final t = lane.tracks.first;
       expect(t.preferredFullArtworkUrl, t.artworkLargeUrl);
       expect(t.preferredCompactArtworkUrl, t.artworkMediumUrl);
@@ -125,7 +125,7 @@ void main() {
   });
 
   group('formatTrackTime', () {
-    test('formats like the native player', () {
+    test('formats as minutes and zero-padded seconds', () {
       expect(formatTrackTime(0), '0:00');
       expect(formatTrackTime(0.4), '0:00');
       expect(formatTrackTime(7), '0:07');

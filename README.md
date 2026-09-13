@@ -2,7 +2,7 @@
 
 Twist music swimlane, mini player, full player and background preview playback for any Flutter app.
 
-The package reproduces the native Twist experience shipped in the My Etisalat apps: a curated lane of 30-second previews, a persistent mini player, a full player with an "Up Next" queue, lock-screen controls, and a download prompt on a backend-configured cadence. It depends on nothing but hosted packages and never decides where or when its widgets appear. The host does.
+Drop a music discovery lane into any Flutter app: a curated swimlane of 30-second previews, a persistent mini player, a full player with an "Up Next" queue, lock-screen and notification controls, and a download prompt that nudges listeners to the full app on a cadence the backend configures. The package depends on nothing but hosted packages and never decides where or when its widgets appear. The host does.
 
 ## Install
 
@@ -105,12 +105,12 @@ player.stop(resetSession: true);     // logout
 |---|---|
 | `TwistMusicSwimlane` | Header and an endless peek carousel of artwork cards (artist and title over the art, a "Now Playing" capsule on the active one). Loads the lane itself. `loadingBuilder`, `emptyBuilder`, `onContentAvailabilityChanged`, `backgroundColor`, `cardWidth`. |
 | `TwistMiniPlayer` | The 56-pt capsule: artwork, title, badge, play/pause, close. No positioning of its own. |
-| `TwistPlayerHost` | Recommended: docks the bar above `bottomInset` and expands the player in place. One surface morphs from the 56-pt bar to the full screen on a spring, the artwork flies from its 44-pt slot to the full-size slot, the bar's row fades out and the full content fades in, the way the native player expands. Drag down to collapse. The queue and the download prompt render in the same layer. `visible` hides the bar, `bottomPaddingOf(context)` reserves space in scroll views. |
+| `TwistPlayerHost` | Recommended: docks the bar above `bottomInset` and expands the player in place. One surface morphs from the 56-pt bar to the full screen on a spring, the artwork flies from its 44-pt slot to the full-size slot, the bar's row fades out and the full content fades in, the way a native music player expands. Drag down to collapse. The queue and the download prompt render in the same layer. `visible` hides the bar, `bottomPaddingOf(context)` reserves space in scroll views. |
 | `TwistFullPlayerScreen` / `TwistFullPlayerRoute` | Fallback for hosts without `TwistPlayerHost`: the same content as a slide-up route with drag-to-dismiss and modal sheets. Promo card, artwork, scrub bar, controls, Up Next, artwork-tinted gradient, forced left-to-right. |
 | `TwistPlayerController` | `ChangeNotifier` mirror of the engine for custom UIs. |
 | `TwistLaneSource` | Where tracks come from. `HttpTwistLaneSource` is the default; `FixtureTwistLaneSource` for tests. |
 
-### Behaviour, matching native
+### Behaviour
 
 - Previews are always 30 s; progress, seek and the lock-screen duration are clamped.
 - Next wraps around; Previous restarts past 3 s, otherwise wraps back; clip completion advances without wrap.
@@ -118,11 +118,11 @@ player.stop(resetSession: true);     // logout
 - The first swimlane tap of a session opens the full player; later taps only play.
 - Lock screen / notification: play, pause, next, previous, seek, stop. Remote commands pass through the same prompt gate as taps.
 
-Deliberate divergences from native: playback pauses when headphones are unplugged, `stop(resetSession: true)` exists for logout, and the player stays paused after the user taps Download.
+Also: playback pauses when headphones are unplugged, `stop(resetSession: true)` exists for logout, and the player stays paused after the user taps Download.
 
 ### Analytics
 
-Eight events with their native names and parameters reach `onAnalyticsEvent`: `twist_music_lane_loaded`, `_track_tapped`, `_player_expanded`, `_queue_opened`, `_queue_track_selected`, `_download_prompt_shown`, `_download_prompt_action`, `_download_clicked`. Nothing logs when the callback is null.
+Eight events reach `onAnalyticsEvent` with these names: `twist_music_lane_loaded`, `_track_tapped`, `_player_expanded`, `_queue_opened`, `_queue_track_selected`, `_download_prompt_shown`, `_download_prompt_action`, `_download_clicked`. Nothing logs when the callback is null.
 
 ## Example
 
