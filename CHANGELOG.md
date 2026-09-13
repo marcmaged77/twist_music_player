@@ -1,3 +1,7 @@
+## 0.1.2
+
+- Source now public at github.com/marcmaged77/twist_music_player; `repository` and `issue_tracker` set.
+
 ## 0.1.1
 
 - pub.dev screenshots of the swimlane, full player, mini player and download prompt.
