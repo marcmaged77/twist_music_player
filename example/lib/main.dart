@@ -44,6 +44,7 @@ class ExampleApp extends StatelessWidget {
       listenable: Listenable.merge([_locale, _useHost]),
       builder: (context, _) => MaterialApp(
         title: 'Twist demo host',
+        debugShowCheckedModeBanner: false,
         locale: _locale.value,
         supportedLocales: const [Locale('en'), Locale('ar')],
         localizationsDelegates: const [

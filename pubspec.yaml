@@ -1,6 +1,16 @@
 name: twist_music_player
 description: Twist music swimlane, mini player, full player and background preview playback for any Flutter app.
-version: 0.1.0
+version: 0.1.1
+
+screenshots:
+  - description: The swimlane of preview cards inside a host feed.
+    path: screenshots/swimlane.png
+  - description: The full player expanded in place with the artwork-tinted background.
+    path: screenshots/full_player.png
+  - description: The mini player docked above the host's content.
+    path: screenshots/mini_player.png
+  - description: The download prompt raised on the backend's cadence.
+    path: screenshots/download_prompt.png
 
 environment:
   sdk: ^3.6.0
