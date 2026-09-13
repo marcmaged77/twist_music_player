@@ -1,3 +1,7 @@
+## 0.1.3
+
+- README describes the package on its own terms.
+
 ## 0.1.2
 
 - Source now public at github.com/marcmaged77/twist_music_player; `repository` and `issue_tracker` set.
