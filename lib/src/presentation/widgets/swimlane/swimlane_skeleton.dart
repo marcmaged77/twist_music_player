@@ -54,14 +54,14 @@ class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerPr
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                _Block(width: 60, height: 30, radius: 6, color: base),
+                _Block(width: 60, height: 24, radius: 6, color: base),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Block(width: 140, height: 18, radius: 4, color: base),
                     const SizedBox(height: 6),
-                    _Block(width: 100, height: 12, radius: 4, color: base),
+                    _Block(width: 180, height: 24, radius: 12, color: base),
                   ],
                 ),
               ],

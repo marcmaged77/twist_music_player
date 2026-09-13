@@ -34,6 +34,18 @@ void main() {
     expect(setup.analytics.names, [TwistAnalyticsEvents.laneLoaded]);
   });
 
+  testWidgets('the promo chip opens the download link and logs the header source', (tester) async {
+    final setup = await initTestPlayer(source: CountingLaneSource(lane(1)));
+    await pumpTestApp(tester, const TwistMusicSwimlane(autoScrollInterval: null));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.tap(find.text('Promoted'));
+    await tester.pump();
+    expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadClicked)?['source'],
+        'swimlane_header');
+  });
+
   testWidgets('renders the empty builder when the lane is empty', (tester) async {
     await initTestPlayer(source: CountingLaneSource(lane(0)));
     final availability = <bool>[];

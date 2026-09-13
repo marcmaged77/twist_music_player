@@ -34,7 +34,7 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
   final Color? miniPlayerForeground;
   final Color? artworkPlaceholder;
 
-  /// Primary button colour of the download prompt.
+  /// Accent of the download prompt button and the header promo chip.
   final Color? promptAccent;
 
   static TwistMusicTheme of(BuildContext context) {

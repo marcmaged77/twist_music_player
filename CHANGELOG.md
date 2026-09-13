@@ -1,3 +1,7 @@
+## 0.2.0
+
+- Swimlane header: the subtitle is now a tappable promo chip that opens the download link and logs `twist_music_download_clicked` with source `swimlane_header`; the logo sits on the title's line.
+
 ## 0.1.3
 
 - README describes the package on its own terms.

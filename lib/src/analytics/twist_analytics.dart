@@ -20,6 +20,7 @@ abstract final class TwistAnalyticsSources {
   static const String promptMini = 'prompt_mini';
   static const String promptFullScreen = 'prompt_full_screen';
   static const String fullScreenBanner = 'full_screen_banner';
+  static const String swimlaneHeader = 'swimlane_header';
 }
 
 /// Builds the event payloads and hands them to the host callback.

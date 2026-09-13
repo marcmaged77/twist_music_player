@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../analytics/twist_analytics.dart';
 import '../../data/models/twist_track.dart';
 import '../../l10n/twist_strings.dart';
 import '../../theme/twist_music_theme.dart';
@@ -143,6 +144,8 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
             title: lane.title ?? strings.swimlaneTitle,
             subtitle: lane.subTitle ?? strings.swimlaneSubtitle,
             logo: _player.config.branding?.headerLogo,
+            onPromoTap: () =>
+                _player.openDownloadLink(source: TwistAnalyticsSources.swimlaneHeader),
           ),
           const SizedBox(height: 14),
           LayoutBuilder(

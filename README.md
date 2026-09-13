@@ -103,7 +103,7 @@ player.stop(resetSession: true);     // logout
 
 | Piece | What it is |
 |---|---|
-| `TwistMusicSwimlane` | Header and an endless peek carousel of artwork cards (artist and title over the art, a "Now Playing" capsule on the active one). Loads the lane itself. `loadingBuilder`, `emptyBuilder`, `onContentAvailabilityChanged`, `backgroundColor`, `cardWidth`. |
+| `TwistMusicSwimlane` | Header (logo, title, promo chip that opens the download link) and an endless peek carousel of artwork cards (artist and title over the art, a "Now Playing" capsule on the active one). Loads the lane itself. `loadingBuilder`, `emptyBuilder`, `onContentAvailabilityChanged`, `backgroundColor`, `cardWidth`. |
 | `TwistMiniPlayer` | The 56-pt capsule: artwork, title, badge, play/pause, close. No positioning of its own. |
 | `TwistPlayerHost` | Recommended: docks the bar above `bottomInset` and expands the player in place. One surface morphs from the 56-pt bar to the full screen on a spring, the artwork flies from its 44-pt slot to the full-size slot, the bar's row fades out and the full content fades in, the way a native music player expands. Drag down to collapse. The queue and the download prompt render in the same layer. `visible` hides the bar, `bottomPaddingOf(context)` reserves space in scroll views. |
 | `TwistFullPlayerScreen` / `TwistFullPlayerRoute` | Fallback for hosts without `TwistPlayerHost`: the same content as a slide-up route with drag-to-dismiss and modal sheets. Promo card, artwork, scrub bar, controls, Up Next, artwork-tinted gradient, forced left-to-right. |
