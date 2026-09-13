@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../l10n/twist_strings.dart';
 import 'equalizer_bars.dart';
+import 'twist_play_pause_icon.dart';
 
 /// "Preview" label with a play glyph, or animated bars while playing.
 class PreviewBadge extends StatelessWidget {
@@ -23,7 +23,9 @@ class PreviewBadge extends StatelessWidget {
           child: Center(
             child: isPlaying
                 ? EqualizerBars(barWidth: 2.5, maxHeight: 11, minHeight: 3, color: color)
-                : Icon(Iconsax.play5, size: 11, color: color),
+                : CustomPaint(
+                    size: const Size.square(10),
+                    painter: PlayPauseGlyphPainter(progress: 0, color: color)),
           ),
         ),
         const SizedBox(width: 5),
