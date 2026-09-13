@@ -1,16 +1,12 @@
-# twist_music_player_example
+# twist_music_player example
 
-A new Flutter project.
+A small host app showing the two ways to show the player:
 
-## Getting Started
+- **Docked bar** (default): `MaterialApp.builder` wraps the app in `TwistPlayerHost`, which docks the mini bar and expands the full player in place.
+- **Manual bar**: tap "Manual bar" in the app bar. The host is removed and `TwistMiniPlayer` sits in `Scaffold.bottomNavigationBar`; a tap on it pushes the full player route.
 
-This project is a starting point for a Flutter application.
+The lane loads from the endpoint you pass at build time:
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter run --dart-define=TWIST_TRACKS_URL=https://<your-lane-endpoint>/tracks --dart-define=TWIST_STORE_URL=https://<your-store-page>
+```

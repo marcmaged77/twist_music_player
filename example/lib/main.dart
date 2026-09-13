@@ -15,6 +15,9 @@ const String _storeUrl = String.fromEnvironment(
 
 final ValueNotifier<Locale> _locale = ValueNotifier<Locale>(const Locale('en'));
 
+/// True docks the bar through [TwistPlayerHost]; false places [TwistMiniPlayer] by hand.
+final ValueNotifier<bool> _useHost = ValueNotifier<bool>(true);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await TwistMusicPlayer.init(
@@ -37,11 +40,11 @@ class ExampleApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Locale>(
-      valueListenable: _locale,
-      builder: (context, locale, _) => MaterialApp(
+    return ListenableBuilder(
+      listenable: Listenable.merge([_locale, _useHost]),
+      builder: (context, _) => MaterialApp(
         title: 'Twist demo host',
-        locale: locale,
+        locale: _locale.value,
         supportedLocales: const [Locale('en'), Locale('ar')],
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
@@ -50,7 +53,9 @@ class ExampleApp extends StatelessWidget {
           TwistMusicLocalizations.delegate,
         ],
         theme: ThemeData(colorSchemeSeed: const Color(0xFF2D5BFF), useMaterial3: true),
-        builder: (context, child) => TwistPlayerHost(bottomInset: 0, child: child!),
+        // Pattern 1: the host docks the bar and expands the player in place.
+        builder: (context, child) =>
+            _useHost.value ? TwistPlayerHost(bottomInset: 0, child: child!) : child!,
         home: const HomePage(),
       ),
     );
@@ -68,6 +73,10 @@ class HomePage extends StatelessWidget {
         title: const Text('Twist demo host'),
         actions: [
           TextButton(
+            onPressed: () => _useHost.value = !_useHost.value,
+            child: Text(_useHost.value ? 'Manual bar' : 'Docked bar'),
+          ),
+          TextButton(
             onPressed: () {
               _locale.value =
                   _locale.value.languageCode == 'en' ? const Locale('ar') : const Locale('en');
@@ -77,6 +86,17 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+      // Pattern 2: place the bar yourself. It renders nothing while idle, so
+      // the bottom slot collapses until a track plays; a tap pushes the full
+      // player route because no host is mounted.
+      bottomNavigationBar: _useHost.value
+          ? null
+          : const SafeArea(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(12, 0, 12, 8),
+                child: TwistMiniPlayer(),
+              ),
+            ),
       body: Builder(
         builder: (context) => ListView(
           padding: EdgeInsets.only(bottom: TwistPlayerHost.bottomPaddingOf(context) + 24),

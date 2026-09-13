@@ -85,7 +85,9 @@ builder: (context, child) => TwistPlayerHost(child: child!, bottomInset: 72),
 // Wherever your feed decides
 if (feed.showTwist) const TwistMusicSwimlane(),
 
-// Or place the mini player yourself; it renders nothing while idle
+// Or place the mini player yourself; it renders nothing while idle and a tap
+// pushes the full player route when no host is mounted. The example app's
+// "Manual bar" button switches between the two patterns.
 Positioned(left: 12, right: 12, bottom: 80, child: const TwistMiniPlayer()),
 
 // Programmatic control
