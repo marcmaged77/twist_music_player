@@ -5,7 +5,6 @@ import 'package:flutter/painting.dart';
 abstract final class TwistColors {
   /// Twist brand blue, sampled from the wordmark.
   static const Color accent = Color(0xFF0017A4);
-  static const Color laneBackground = Color(0xFF0B0B0F);
   static const Color darkNavy = Color(0xFF0F1224);
   static const Color fallbackSecondary = Color(0xFF1A1A33);
   static const Color onDark = Color(0xFFFFFFFF);

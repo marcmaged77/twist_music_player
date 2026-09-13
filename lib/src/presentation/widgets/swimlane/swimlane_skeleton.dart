@@ -26,8 +26,9 @@ class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    const base = Color(0x14FFFFFF);
-    const highlight = Color(0x2EFFFFFF);
+    final scheme = Theme.of(context).colorScheme;
+    final base = scheme.surfaceContainerHighest;
+    final highlight = scheme.surface;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -38,7 +39,7 @@ class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerPr
             return LinearGradient(
               begin: Alignment(-1 + 3 * t - 1, 0),
               end: Alignment(-1 + 3 * t + 1, 0),
-              colors: const [base, highlight, base],
+              colors: [base, highlight, base],
               stops: const [0.35, 0.5, 0.65],
             ).createShader(bounds);
           },
@@ -49,17 +50,17 @@ class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerPr
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 _Block(width: 60, height: 30, radius: 6, color: base),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _Block(width: 140, height: 18, radius: 4, color: base),
-                    SizedBox(height: 6),
+                    const SizedBox(height: 6),
                     _Block(width: 100, height: 12, radius: 4, color: base),
                   ],
                 ),

@@ -37,7 +37,7 @@ class TwistMusicSwimlane extends StatefulWidget {
   /// Square card side. Null sizes it from the width, so the neighbours peek.
   final double? cardWidth;
 
-  /// Fill behind the lane. Null uses [TwistMusicTheme.laneBackground].
+  /// Fill behind the lane. Null uses [TwistMusicTheme.laneBackground], transparent by default.
   final Color? backgroundColor;
 
   /// Null disables auto-advance.
@@ -124,11 +124,9 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
   }
 
   Widget _band(BuildContext context, Widget child) {
-    final theme = TwistMusicTheme.of(context);
-    return ColoredBox(
-      color: widget.backgroundColor ?? theme.laneBackground ?? Colors.black,
-      child: Padding(padding: widget.padding, child: child),
-    );
+    final color = widget.backgroundColor ?? TwistMusicTheme.of(context).laneBackground;
+    final padded = Padding(padding: widget.padding, child: child);
+    return color == null ? padded : ColoredBox(color: color, child: padded);
   }
 
   Widget _buildLane(BuildContext context) {

@@ -43,11 +43,10 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     final text = theme.textTheme;
     final scheme = theme.colorScheme;
     final defaults = TwistMusicTheme(
-      laneBackground: TwistColors.laneBackground,
       headerTitleStyle: (text.titleLarge ?? const TextStyle(fontSize: 20))
-          .copyWith(fontWeight: FontWeight.w700, color: TwistColors.onDark),
+          .copyWith(fontWeight: FontWeight.w700, color: scheme.onSurface),
       headerSubtitleStyle: (text.bodySmall ?? const TextStyle(fontSize: 13))
-          .copyWith(color: TwistColors.onDarkMuted),
+          .copyWith(color: scheme.onSurfaceVariant),
       cardTitleStyle: (text.titleLarge ?? const TextStyle(fontSize: 20))
           .copyWith(fontWeight: FontWeight.w700, color: TwistColors.onDark),
       cardArtistStyle: (text.bodyMedium ?? const TextStyle(fontSize: 14))
