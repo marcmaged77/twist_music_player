@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../theme/twist_colors.dart';
 import 'banner_band.dart';
+import 'track_card.dart';
 
-/// Loading placeholder mirroring the header and the centered card row, with
-/// a sweep. [banner] mirrors the banner style: a band the cards overlap.
-class SwimlaneSkeleton extends StatefulWidget {
+/// Loading placeholder that mirrors the loaded lane: the same white
+/// containers (band or header, cards) with grey lines inside where the
+/// content will be. Only the grey lines shimmer.
+class SwimlaneSkeleton extends StatelessWidget {
   const SwimlaneSkeleton({
     super.key,
     this.cardWidth = 248,
@@ -18,10 +20,209 @@ class SwimlaneSkeleton extends StatefulWidget {
   final bool banner;
 
   @override
-  State<SwimlaneSkeleton> createState() => _SwimlaneSkeletonState();
+  Widget build(BuildContext context) => banner ? _bannerLayout() : _plainLayout();
+
+  Widget _plainLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: _Shimmer(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Line(width: 70, height: 24, radius: 6),
+                SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Line(width: 160, height: 18),
+                    SizedBox(height: 8),
+                    _Line(width: 190, height: 24, radius: 12),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 14),
+        _cards(),
+      ],
+    );
+  }
+
+  Widget _bannerLayout() {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: 16,
+          right: 16,
+          top: 0,
+          bottom: cardWidth * 0.6,
+          child: const _Container(
+            color: TwistColors.skeletonBand,
+            clipper: BannerBandClipper(topRadius: 20, bottomBulge: 32),
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(36, 22, 36, 0),
+              child: _Shimmer(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 5,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _Line(width: 70, height: 26, radius: 6),
+                          SizedBox(height: 8),
+                          _Line(width: 150, height: 13),
+                          SizedBox(height: 16),
+                          _Line(width: 140, height: 36, radius: 18),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _Line(width: 140, height: 15),
+                          SizedBox(height: 6),
+                          _Line(width: 100, height: 15),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            _cards(),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Three cards laid out like the carousel: the middle one full size, the
+  /// neighbours at 90 % peeking in from the edges.
+  Widget _cards() {
+    return SizedBox(
+      height: cardWidth,
+      child: ClipRect(
+        clipper: const _SidesClipper(),
+        child: OverflowBox(
+          minWidth: 0,
+          maxWidth: double.infinity,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < 3; i++) ...[
+                if (i > 0) SizedBox(width: spacing + cardWidth * 0.05),
+                Transform.scale(scale: i == 1 ? 1 : 0.9, child: _card()),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _card() {
+    return SizedBox(
+      width: cardWidth,
+      height: cardWidth,
+      child: _Container(
+        radius: TrackCard.radius,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: _Shimmer(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Expanded(
+                    child: _Line(width: double.infinity, height: double.infinity, radius: 10)),
+                const SizedBox(height: 12),
+                const _Line(width: 90, height: 13),
+                const SizedBox(height: 6),
+                _Line(width: cardWidth * 0.6, height: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerProviderStateMixin {
+/// A solid white container with the loaded content's shape.
+class _Container extends StatelessWidget {
+  const _Container({
+    this.child,
+    this.radius,
+    this.clipper,
+    this.color = TwistColors.skeletonSurface,
+  });
+
+  final Widget? child;
+  final double? radius;
+  final CustomClipper<Path>? clipper;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final box = DecoratedBox(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: radius == null ? null : BorderRadius.circular(radius!),
+        border: radius == null ? null : Border.all(color: TwistColors.skeletonBorder, width: 0.5),
+      ),
+      child: child ?? const SizedBox.expand(),
+    );
+    return clipper == null ? box : ClipPath(clipper: clipper, child: box);
+  }
+}
+
+/// Grey placeholder line or block.
+class _Line extends StatelessWidget {
+  const _Line({required this.width, required this.height, this.radius = 4});
+
+  final double width;
+  final double height;
+  final double radius;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: width,
+        height: height,
+        decoration: BoxDecoration(
+          color: TwistColors.skeletonBase,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+      );
+}
+
+/// A light sweep across the grey lines only, never the white containers.
+class _Shimmer extends StatefulWidget {
+  const _Shimmer({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_Shimmer> createState() => _ShimmerState();
+}
+
+class _ShimmerState extends State<_Shimmer> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1500),
@@ -35,142 +236,37 @@ class _SwimlaneSkeletonState extends State<SwimlaneSkeleton> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    // One fixed neutral, whatever the host theme, so the lane loads the same everywhere.
-    const base = TwistColors.skeletonBase;
-    const highlight = TwistColors.skeletonHighlight;
     return AnimatedBuilder(
       animation: _controller,
-      builder: (context, child) {
-        return ShaderMask(
-          blendMode: BlendMode.srcATop,
-          shaderCallback: (bounds) {
-            final t = _controller.value;
-            return LinearGradient(
-              begin: Alignment(-1 + 3 * t - 1, 0),
-              end: Alignment(-1 + 3 * t + 1, 0),
-              colors: const [base, highlight, base],
-              stops: const [0.35, 0.5, 0.65],
-            ).createShader(bounds);
-          },
-          child: child,
-        );
-      },
-      child: widget.banner ? _bannerLayout(base) : _plainLayout(base),
-    );
-  }
-
-  Widget _plainLayout(Color base) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              _Block(width: 60, height: 24, radius: 6, color: base),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Block(width: 140, height: 18, radius: 4, color: base),
-                  const SizedBox(height: 6),
-                  _Block(width: 180, height: 24, radius: 12, color: base),
-                ],
-              ),
+      builder: (context, child) => ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (bounds) {
+          final t = _controller.value;
+          return LinearGradient(
+            begin: Alignment(-1 + 3 * t - 1, 0),
+            end: Alignment(-1 + 3 * t + 1, 0),
+            colors: const [
+              TwistColors.skeletonBase,
+              TwistColors.skeletonHighlight,
+              TwistColors.skeletonBase,
             ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        _cards(base),
-      ],
-    );
-  }
-
-  Widget _bannerLayout(Color base) {
-    return Stack(
-      children: [
-        Positioned(
-          left: 16,
-          right: 16,
-          top: 0,
-          bottom: widget.cardWidth * 0.6,
-          child: ClipPath(
-            clipper: const BannerBandClipper(topRadius: 20, bottomBulge: 32),
-            child: ColoredBox(color: base),
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(36, 22, 36, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Block(width: 70, height: 26, radius: 6, color: base),
-                  const SizedBox(height: 8),
-                  _Block(width: 150, height: 13, radius: 4, color: base),
-                  const SizedBox(height: 16),
-                  _Block(width: 140, height: 36, radius: 18, color: base),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            _cards(base),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _cards(Color base) {
-    return SizedBox(
-      height: widget.cardWidth,
-      child: ClipRect(
-        child: OverflowBox(
-          minWidth: 0,
-          maxWidth: double.infinity,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              for (var i = 0; i < 3; i++) ...[
-                if (i > 0) SizedBox(width: widget.spacing + widget.cardWidth * 0.05),
-                Transform.scale(
-                  scale: i == 1 ? 1 : 0.9,
-                  child: _Block(
-                      width: widget.cardWidth, height: widget.cardWidth, radius: 16, color: base),
-                ),
-              ],
-            ],
-          ),
-        ),
+            stops: const [0.35, 0.5, 0.65],
+          ).createShader(bounds);
+        },
+        child: child,
       ),
+      child: widget.child,
     );
   }
 }
 
-class _Block extends StatelessWidget {
-  const _Block({
-    required this.width,
-    required this.height,
-    required this.radius,
-    required this.color,
-  });
-
-  final double width;
-  final double height;
-  final double radius;
-  final Color color;
+/// Clips the card row at the sides only.
+class _SidesClipper extends CustomClipper<Rect> {
+  const _SidesClipper();
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: width,
-        height: height,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(radius),
-        ),
-      );
+  Rect getClip(Size size) => Rect.fromLTRB(0, -40, size.width, size.height + 40);
+
+  @override
+  bool shouldReclip(_SidesClipper oldClipper) => false;
 }

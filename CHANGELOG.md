@@ -1,3 +1,8 @@
+## 0.3.1
+
+- Loading skeleton rebuilt as solid containers in the loaded content's shape (band or header, white cards with the real radius and shadow) with grey lines inside where the content will be; only the lines shimmer. Fixed colours regardless of the host theme.
+- Card shadows are no longer clipped below the carousel in the banner style or the skeleton.
+
 ## 0.3.0
 
 - `TwistMusicSwimlane(style: TwistSwimlaneStyle.banner)`: a brand gradient band (105°, blue to violet to red) with a red glow travelling on its right, rounded top corners and an oval bottom edge; the white wordmark and lane title on the left, the lane subtitle as the offer text on the right, a white "Download Twist" pill, and the cards overlapping the band by 40 %. `TwistMusicTheme.bannerGradient` overrides the band statically.

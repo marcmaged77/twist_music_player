@@ -196,7 +196,9 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
               final theme = TwistMusicTheme.of(context);
               // The rounded band sits behind the header and the top 40 % of the
               // cards; the carousel itself runs edge to edge.
+              // Clip.none lets the card shadows spill below the lane.
               return Stack(
+                clipBehavior: Clip.none,
                 children: [
                   Positioned(
                     left: 16,

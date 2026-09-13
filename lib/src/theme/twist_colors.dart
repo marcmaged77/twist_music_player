@@ -8,7 +8,10 @@ abstract final class TwistColors {
   static const Color bannerViolet = Color(0xFF8A1A6A);
   static const Color bannerRed = Color(0xFFEC1C24);
   static const Color cardShadow = Color(0x40000000);
-  static const Color skeletonBase = Color(0xFFE4E5EB);
+  static const Color skeletonSurface = Color(0xFFFFFFFF);
+  static const Color skeletonBand = Color(0xFFF1F2F8);
+  static const Color skeletonBorder = Color(0x14000000);
+  static const Color skeletonBase = Color(0xFFE1E2E9);
   static const Color skeletonHighlight = Color(0xFFF4F5F9);
   static const Color darkNavy = Color(0xFF0F1224);
   static const Color fallbackSecondary = Color(0xFF1A1A33);
