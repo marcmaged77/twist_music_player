@@ -1,7 +1,6 @@
 name: twist_music_player
 description: Twist music swimlane, mini player, full player and background preview playback for any Flutter app.
 version: 0.1.0
-# repository: set to the public repository before the first `dart pub publish`.
 
 environment:
   sdk: ^3.6.0

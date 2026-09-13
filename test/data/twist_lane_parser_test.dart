@@ -16,7 +16,7 @@ void main() {
     test('keeps the envelope and every playable track in order', () {
       expect(lane.title, 'Music, Podcast & Radio');
       expect(lane.subTitle, 'Download & Get 1 Month Premium');
-      expect(lane.downloadUrl, startsWith('https://twist-music.go.link/'));
+      expect(lane.downloadUrl, startsWith('https://download.example.com/'));
       expect(lane.tracks, hasLength(20));
       expect(lane.tracks.first.id, 358233598);
       expect(lane.tracks.first.artistName, 'Kadim Al Sahir');

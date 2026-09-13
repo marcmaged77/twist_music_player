@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:twist_music_player/twist_music_player.dart';
 
-/// Pass the endpoint and store page at build time so nothing Twist-specific
-/// lives in the source: `flutter run --dart-define=TWIST_TRACKS_URL=...`.
+/// Pass the lane endpoint and the store page at build time:
+/// `flutter run --dart-define=TWIST_TRACKS_URL=... --dart-define=TWIST_STORE_URL=...`.
 const String _tracksUrl = String.fromEnvironment(
   'TWIST_TRACKS_URL',
-  defaultValue: 'https://api.twistmena.com/music/guest/tracks',
+  defaultValue: 'https://example.com/music/tracks',
 );
 const String _storeUrl = String.fromEnvironment(
   'TWIST_STORE_URL',
-  defaultValue: 'https://music.twistmena.com',
+  defaultValue: 'https://example.com/get-the-app',
 );
 
 final ValueNotifier<Locale> _locale = ValueNotifier<Locale>(const Locale('en'));
@@ -26,10 +26,6 @@ Future<void> main() async {
       downloadFallbackUrl: Uri.parse(_storeUrl),
       onAnalyticsEvent: (name, parameters) => debugPrint('[analytics] $name $parameters'),
       onError: (error, stack) => debugPrint('[twist] $error'),
-      branding: const TwistBranding(
-        headerLogo: AssetImage('assets/twist_wordmark_blue.png'),
-        promoLogo: AssetImage('assets/twist_wordmark_white.png'),
-      ),
       androidNotificationChannelId: 'com.example.twist.audio',
     ),
   );
@@ -73,9 +69,8 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              _locale.value = _locale.value.languageCode == 'en'
-                  ? const Locale('ar')
-                  : const Locale('en');
+              _locale.value =
+                  _locale.value.languageCode == 'en' ? const Locale('ar') : const Locale('en');
               player.laneController.reload();
             },
             child: Text(_locale.value.languageCode == 'en' ? 'AR' : 'EN'),

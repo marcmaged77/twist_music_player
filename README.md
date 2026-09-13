@@ -60,16 +60,16 @@ Background audio needs the same platform configuration `audio_service` requires.
 await TwistMusicPlayer.init(
   TwistMusicConfig(
     laneSource: HttpTwistLaneSource(
-      Uri.parse('https://api.twistmena.com/music/guest/tracks'),
+      Uri.parse('https://<your-lane-endpoint>/tracks'),
       headers: () => {'Accept-Language': currentLanguageCode()},   // 'en' | 'ar'
     ),
-    downloadFallbackUrl: Uri.parse('https://apps.apple.com/app/id...'),
+    downloadFallbackUrl: Uri.parse('https://<your-store-page>'),
     onAnalyticsEvent: (name, parameters) =>
         FirebaseAnalytics.instance.logEvent(name: name, parameters: parameters),
     onError: (error, stack) => FirebaseCrashlytics.instance.recordError(error, stack),
     branding: const TwistBranding(
-      headerLogo: AssetImage('assets/twist_wordmark_blue.png'),
-      promoLogo: AssetImage('assets/twist_wordmark_white.png'),
+      headerLogo: AssetImage('assets/your_logo_dark.png'),
+      promoLogo: AssetImage('assets/your_logo_light.png'),
     ),
   ),
 );
@@ -126,7 +126,7 @@ Eight events with their native names and parameters reach `onAnalyticsEvent`: `t
 
 ```bash
 cd example
-flutter run --dart-define=TWIST_TRACKS_URL=https://api.twistmena.com/music/guest/tracks
+flutter run --dart-define=TWIST_TRACKS_URL=https://<your-lane-endpoint>/tracks --dart-define=TWIST_STORE_URL=https://<your-store-page>
 ```
 
 ## Tests
