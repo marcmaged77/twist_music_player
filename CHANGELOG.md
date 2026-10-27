@@ -1,3 +1,11 @@
+## 0.4.0
+
+- `TwistMusicSwimlane(style: TwistSwimlaneStyle.coverflow)`: the brand band with a flat, rounded bottom edge; the wordmark and a translucent "Download Now" pill on one line, the lane title in caps and the offer text under it; and an endless fan of tiles: the centre one upright and on top, the neighbours tucked under it at 72 %, tilted 7° outwards and dimmed under a white veil (opaque, not transparent), each a translucent white tile with the artwork, a bottom-left "Now Playing" row while it plays, and the title and artist underneath. Taps resolve to the tile actually on top. Mirrors in RTL.
+- `TwistMusicTheme.coverflowCardFill`, `coverflowTitleStyle` and `coverflowArtistStyle` override the tiles; the band still follows `bannerGradient`. The lane's texts ask for the `Lufga` family in Medium (`TwistMusicTheme.fontFamily`); the package ships no font, so declare it in the host app or point the token at a font another package bundles. Header sizes scale from the 375 pt design to the lane width.
+- The "Download Now" chip follows the design spec (15 pt corners, white fill and 1 pt inner stroke, inner glow and drop shadow, Lufga Medium 15 pt on every phone) and ripples on tap.
+- New string `swimlaneDownloadCta` ("Download Now"). The loading skeleton mirrors the fan.
+- The example app cycles the three lane styles from its app bar.
+
 ## 0.3.1
 
 - Loading skeleton rebuilt as solid containers in the loaded content's shape (band or header, white cards with the real radius and shadow) with grey lines inside where the content will be; only the lines shimmer. Fixed colours regardless of the host theme.
