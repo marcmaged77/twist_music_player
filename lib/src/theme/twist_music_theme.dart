@@ -20,7 +20,16 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     this.artworkPlaceholder,
     this.promptAccent,
     this.bannerGradient,
+    this.coverflowCardFill,
+    this.coverflowTitleStyle,
+    this.coverflowArtistStyle,
+    this.fontFamily,
   });
+
+  /// Family the coverflow lane asks for by default. The package ships no font
+  /// files: declare the family in the host app, or point [fontFamily] at a
+  /// font another package bundles (for example 'packages/<pkg>/Lufga').
+  static const String defaultFontFamily = 'Lufga';
 
   /// Fill behind the lane's header and carousel.
   final Color? laneBackground;
@@ -40,6 +49,16 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
 
   /// Static override of the animated brand band behind the banner header.
   final Gradient? bannerGradient;
+
+  /// Fill of the coverflow tiles; translucent white by default.
+  final Color? coverflowCardFill;
+
+  /// Title and artist under the artwork of a coverflow tile; dark ink by default.
+  final TextStyle? coverflowTitleStyle;
+  final TextStyle? coverflowArtistStyle;
+
+  /// Font family of the coverflow lane's texts; [defaultFontFamily] unless set.
+  final String? fontFamily;
 
   static TwistMusicTheme of(BuildContext context) {
     final theme = Theme.of(context);
@@ -61,6 +80,19 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
       miniPlayerForeground: scheme.onSurface,
       artworkPlaceholder: TwistColors.artworkPlaceholderDark,
       promptAccent: TwistColors.accent,
+      coverflowCardFill: TwistColors.coverflowCardFill,
+      coverflowTitleStyle: (text.titleSmall ?? const TextStyle(fontSize: 14)).copyWith(
+          fontFamily: override?.fontFamily ?? defaultFontFamily,
+          fontSize: 15,
+          fontWeight: FontWeight.w500,
+          color: TwistColors.inkTitle,
+          height: 1.2),
+      coverflowArtistStyle: (text.bodySmall ?? const TextStyle(fontSize: 12)).copyWith(
+          fontFamily: override?.fontFamily ?? defaultFontFamily,
+          fontWeight: FontWeight.w500,
+          color: TwistColors.inkMuted,
+          height: 1.2),
+      fontFamily: defaultFontFamily,
     );
     return override == null ? defaults : defaults.merge(override);
   }
@@ -77,6 +109,10 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
         artworkPlaceholder: other.artworkPlaceholder ?? artworkPlaceholder,
         promptAccent: other.promptAccent ?? promptAccent,
         bannerGradient: other.bannerGradient ?? bannerGradient,
+        coverflowCardFill: other.coverflowCardFill ?? coverflowCardFill,
+        coverflowTitleStyle: other.coverflowTitleStyle ?? coverflowTitleStyle,
+        coverflowArtistStyle: other.coverflowArtistStyle ?? coverflowArtistStyle,
+        fontFamily: other.fontFamily ?? fontFamily,
       );
 
   @override
@@ -92,6 +128,10 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
     Color? artworkPlaceholder,
     Color? promptAccent,
     Gradient? bannerGradient,
+    Color? coverflowCardFill,
+    TextStyle? coverflowTitleStyle,
+    TextStyle? coverflowArtistStyle,
+    String? fontFamily,
   }) =>
       TwistMusicTheme(
         laneBackground: laneBackground ?? this.laneBackground,
@@ -105,6 +145,10 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
         artworkPlaceholder: artworkPlaceholder ?? this.artworkPlaceholder,
         promptAccent: promptAccent ?? this.promptAccent,
         bannerGradient: bannerGradient ?? this.bannerGradient,
+        coverflowCardFill: coverflowCardFill ?? this.coverflowCardFill,
+        coverflowTitleStyle: coverflowTitleStyle ?? this.coverflowTitleStyle,
+        coverflowArtistStyle: coverflowArtistStyle ?? this.coverflowArtistStyle,
+        fontFamily: fontFamily ?? this.fontFamily,
       );
 
   @override
@@ -122,6 +166,10 @@ class TwistMusicTheme extends ThemeExtension<TwistMusicTheme> {
       artworkPlaceholder: Color.lerp(artworkPlaceholder, other.artworkPlaceholder, t),
       promptAccent: Color.lerp(promptAccent, other.promptAccent, t),
       bannerGradient: Gradient.lerp(bannerGradient, other.bannerGradient, t),
+      coverflowCardFill: Color.lerp(coverflowCardFill, other.coverflowCardFill, t),
+      coverflowTitleStyle: TextStyle.lerp(coverflowTitleStyle, other.coverflowTitleStyle, t),
+      coverflowArtistStyle: TextStyle.lerp(coverflowArtistStyle, other.coverflowArtistStyle, t),
+      fontFamily: t < 0.5 ? fontFamily : other.fontFamily,
     );
   }
 }

@@ -26,4 +26,13 @@ abstract final class TwistColors {
   static const Color artworkPlaceholderDark = Color(0xFF2C2C3A);
   static const Color promoCardFill = Color(0x14FFFFFF);
   static const Color promoCtaFill = Color(0x33FFFFFF);
+  static const Color coverflowCardFill = Color(0x59FFFFFF);
+  static const Color chipFill = Color(0x40FFFFFF);
+  static const Color chipBorder = Color(0x59FFFFFF);
+  static const Color chipHighlight = Color(0x33FFFFFF);
+  static const Color chipShadow = Color(0x40000000);
+  static const Color chipSplash = Color(0x4DFFFFFF);
+  static const Color coverflowShadow = Color(0x1F000000);
+  static const Color inkTitle = Color(0xFF1C1C1E);
+  static const Color inkMuted = Color(0xFF6E6E73);
 }

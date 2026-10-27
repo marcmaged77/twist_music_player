@@ -1,7 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../theme/twist_colors.dart';
+import '../../../theme/twist_music_theme.dart';
 import 'banner_band.dart';
+import 'coverflow_track_card.dart';
+import 'swimlane_style.dart';
 import 'track_card.dart';
 
 /// Loading placeholder that mirrors the loaded lane: the same white
@@ -12,15 +17,141 @@ class SwimlaneSkeleton extends StatelessWidget {
     super.key,
     this.cardWidth = 248,
     this.spacing = 2,
-    this.banner = false,
+    this.style = TwistSwimlaneStyle.plain,
   });
 
   final double cardWidth;
   final double spacing;
-  final bool banner;
+  final TwistSwimlaneStyle style;
 
   @override
-  Widget build(BuildContext context) => banner ? _bannerLayout() : _plainLayout();
+  Widget build(BuildContext context) {
+    switch (style) {
+      case TwistSwimlaneStyle.plain:
+        return _plainLayout();
+      case TwistSwimlaneStyle.banner:
+        return _bannerLayout();
+      case TwistSwimlaneStyle.coverflow:
+        return _coverflowLayout(CoverflowTrackCard.heightFor(cardWidth, TwistMusicTheme.of(context)));
+    }
+  }
+
+  Widget _coverflowLayout(double cardHeight) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          left: 16,
+          right: 16,
+          top: 0,
+          bottom: cardHeight * (1 - CoverflowTrackCard.bandOverlap),
+          child: const _Container(
+            color: TwistColors.skeletonBand,
+            clipper: BannerBandClipper(topRadius: 20, bottomBulge: 0, bottomRadius: 20),
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(36, 20, 36, 0),
+              child: _Shimmer(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        _Line(width: 70, height: 24, radius: 6),
+                        Spacer(),
+                        _Line(width: 118, height: 34, radius: 17),
+                      ],
+                    ),
+                    SizedBox(height: 22),
+                    _Line(width: 200, height: 15),
+                    SizedBox(height: 6),
+                    _Line(width: 160, height: 12),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+            _fan(cardHeight),
+          ],
+        ),
+      ],
+    );
+  }
+
+  /// Three tiles laid out like the fan: the middle one upright on top, the
+  /// neighbours at 72 %, tilted 7°, veiled and tucked under it.
+  Widget _fan(double cardHeight) {
+    const tilt = 7 * math.pi / 180;
+    final step = 0.62 * cardWidth;
+    return SizedBox(
+      height: cardHeight,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final centerX = constraints.maxWidth / 2;
+          Widget tile(double dx, double scale, double angle, double dim) => Positioned(
+                left: centerX + dx - cardWidth / 2,
+                top: 0,
+                width: cardWidth,
+                height: cardHeight,
+                child: Transform.rotate(
+                  angle: angle,
+                  child: Transform.scale(
+                    scale: scale,
+                    child: ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        TwistColors.onDark.withValues(alpha: dim), BlendMode.srcATop),
+                      child: _tile(),
+                    ),
+                  ),
+                ),
+              );
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              tile(-step, 0.72, -tilt, 0.5),
+              tile(step, 0.72, tilt, 0.5),
+              tile(0, 1, 0, 0),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _tile() {
+    final art = cardWidth - 2 * CoverflowTrackCard.artworkInset;
+    return _Container(
+      radius: CoverflowTrackCard.radius,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
+        child: _Shimmer(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Line(width: art, height: art, radius: 12),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _Line(width: cardWidth * 0.45, height: 15),
+                    const SizedBox(height: 3),
+                    _Line(width: cardWidth * 0.3, height: 12),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _plainLayout() {
     return Column(

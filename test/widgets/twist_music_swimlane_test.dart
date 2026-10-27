@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:twist_music_player/src/presentation/widgets/swimlane/coverflow_track_card.dart';
 import 'package:twist_music_player/src/presentation/widgets/swimlane/track_card.dart';
 import 'package:twist_music_player/twist_music_player.dart';
 
@@ -184,5 +185,124 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(setup.player.isFullPlayerOpen, isFalse);
+  });
+
+  group('coverflow style', () {
+    const lane3 = TwistMusicSwimlane(autoScrollInterval: null, style: TwistSwimlaneStyle.coverflow);
+
+    Finder tile(String title) =>
+        find.ancestor(of: find.text(title), matching: find.byType(CoverflowTrackCard));
+
+    testWidgets('shows the lane title in caps, the offer and a Download Now pill', (tester) async {
+      final setup = await initTestPlayer(
+          source: CountingLaneSource(lane(3, title: 'Music, Podcast & Radio')));
+      await pumpTestApp(tester, lane3);
+      await tester.pump();
+      await tester.pump();
+      expect(find.text('MUSIC, PODCAST & RADIO'), findsOneWidget);
+      expect(find.text('Promoted'), findsOneWidget);
+      expect(find.text('Track 1'), findsOneWidget);
+
+      expect(find.ancestor(of: find.text('Download Now'), matching: find.byType(InkWell)),
+          findsOneWidget);
+      await tester.tap(find.text('Download Now'));
+      await tester.pump();
+      expect(setup.analytics.paramsOf(TwistAnalyticsEvents.downloadClicked)?['source'],
+          'swimlane_header');
+      await tester.pump(const Duration(seconds: 1));
+    });
+
+    testWidgets('fans the neighbours around the centre tile and taps the tile on top',
+        (tester) async {
+      final setup = await initTestPlayer(source: CountingLaneSource(lane(3)));
+      await pumpTestApp(tester, lane3);
+      await tester.pump();
+      await tester.pump();
+      final width = tester.getSize(find.byType(TwistMusicSwimlane)).width;
+      expect(tester.getCenter(tile('Track 1')).dx, closeTo(width / 2, 1));
+      expect(tester.getCenter(tile('Track 2')).dx, greaterThan(width / 2));
+      expect(tester.getCenter(tile('Track 3')).dx, lessThan(width / 2));
+      // getRect follows the paint transform, so the scaled neighbour measures narrower.
+      expect(tester.getRect(tile('Track 2')).width, lessThan(tester.getRect(tile('Track 1')).width));
+
+      // The right edge of the centre tile covers the neighbour tucked under it.
+      final centre = tester.getRect(tile('Track 1'));
+      await tester.tapAt(Offset(centre.right - 6, centre.center.dy));
+      await tester.pump();
+      expect(setup.player.engine.snapshot.currentTrack?.id, 1);
+
+      // Let the first-tap expansion timer run out before the tree goes away.
+      await setup.player.stop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+    });
+
+    testWidgets('plays a neighbour when its visible part is tapped', (tester) async {
+      final setup = await initTestPlayer(source: CountingLaneSource(lane(3)));
+      await pumpTestApp(tester, lane3);
+      await tester.pump();
+      await tester.pump();
+
+      final width = tester.getSize(find.byType(TwistMusicSwimlane)).width;
+      await tester.tapAt(tester.getCenter(tile('Track 2')));
+      await tester.pump();
+      expect(setup.player.engine.snapshot.currentTrack?.id, 2);
+      // Playing a neighbour never moves the fan.
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.getCenter(tile('Track 1')).dx, closeTo(width / 2, 1));
+
+      // Let the first-tap expansion timer run out before the tree goes away.
+      await setup.player.stop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+    });
+
+    testWidgets('mirrors the fan in RTL', (tester) async {
+      await initTestPlayer(source: CountingLaneSource(lane(3)));
+      await pumpTestApp(tester, lane3, locale: const Locale('ar'));
+      await tester.pump();
+      await tester.pump();
+      final width = tester.getSize(find.byType(TwistMusicSwimlane)).width;
+      expect(tester.getCenter(tile('Track 1')).dx, closeTo(width / 2, 1));
+      expect(tester.getCenter(tile('Track 2')).dx, lessThan(width / 2));
+      expect(find.text('حمّل الآن'), findsOneWidget);
+    });
+
+    testWidgets('marks the playing tile with Now Playing', (tester) async {
+      final setup = await initTestPlayer(source: CountingLaneSource(lane(2)));
+      await pumpTestApp(tester, lane3);
+      await tester.pump();
+      await tester.pump();
+
+      await tester.tap(find.text('Track 1'));
+      await tester.pump();
+      expect(setup.player.engine.snapshot.currentTrack?.id, 1);
+      await setup.backend.emitReady();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+      expect(find.text('Now Playing'), findsOneWidget);
+
+      await setup.player.stop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Now Playing'), findsNothing);
+    });
+
+    testWidgets('auto-advance wraps past the last tile', (tester) async {
+      await initTestPlayer(source: CountingLaneSource(lane(3)));
+      await pumpTestApp(
+        tester,
+        const TwistMusicSwimlane(
+            autoScrollInterval: Duration(seconds: 2), style: TwistSwimlaneStyle.coverflow),
+      );
+      await tester.pump();
+      await tester.pump();
+      final width = tester.getSize(find.byType(TwistMusicSwimlane)).width;
+      for (final title in ['Track 2', 'Track 3', 'Track 1']) {
+        await tester.pump(const Duration(seconds: 2));
+        await tester.pump(const Duration(milliseconds: 400));
+        expect(tester.getCenter(tile(title)).dx, closeTo(width / 2, 1));
+      }
+    });
   });
 }

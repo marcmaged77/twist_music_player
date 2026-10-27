@@ -14,6 +14,7 @@ class BannerBand extends StatefulWidget {
     this.gradient,
     this.topRadius = 20,
     this.bottomBulge = 32,
+    this.bottomRadius = 0,
   });
 
   final Gradient? gradient;
@@ -22,7 +23,11 @@ class BannerBand extends StatefulWidget {
   final double topRadius;
 
   /// How far the oval bottom edge dips at the centre below the side edges.
+  /// Zero draws a flat bottom edge instead.
   final double bottomBulge;
+
+  /// Radius of the two bottom corners when the bottom edge is flat.
+  final double bottomRadius;
 
   /// #0021A5 to 55 %, #8A1A6A at 85 %, #EC1C24 at 100 %, at 105°.
   static LinearGradient get brandGradient {
@@ -101,18 +106,28 @@ class _BannerBandState extends State<BannerBand> with SingleTickerProviderStateM
       ]);
     }
     return ClipPath(
-      clipper: BannerBandClipper(topRadius: widget.topRadius, bottomBulge: widget.bottomBulge),
+      clipper: BannerBandClipper(
+        topRadius: widget.topRadius,
+        bottomBulge: widget.bottomBulge,
+        bottomRadius: widget.bottomRadius,
+      ),
       child: band,
     );
   }
 }
 
-/// Rounded top corners and an oval bottom edge that is lowest at the centre.
+/// Rounded top corners and an oval bottom edge that is lowest at the centre,
+/// or a flat bottom edge with [bottomRadius] corners when [bottomBulge] is 0.
 class BannerBandClipper extends CustomClipper<Path> {
-  const BannerBandClipper({required this.topRadius, required this.bottomBulge});
+  const BannerBandClipper({
+    required this.topRadius,
+    required this.bottomBulge,
+    this.bottomRadius = 0,
+  });
 
   final double topRadius;
   final double bottomBulge;
+  final double bottomRadius;
 
   @override
   Path getClip(Size size) {
@@ -120,17 +135,33 @@ class BannerBandClipper extends CustomClipper<Path> {
     final b = bottomBulge;
     final w = size.width;
     final h = size.height;
-    return Path()
+    final path = Path()
       ..moveTo(0, r)
       ..arcToPoint(Offset(r, 0), radius: Radius.circular(r))
       ..lineTo(w - r, 0)
-      ..arcToPoint(Offset(w, r), radius: Radius.circular(r))
-      ..lineTo(w, h - b)
-      ..quadraticBezierTo(w / 2, h + b, 0, h - b)
-      ..close();
+      ..arcToPoint(Offset(w, r), radius: Radius.circular(r));
+    if (b > 0) {
+      path
+        ..lineTo(w, h - b)
+        ..quadraticBezierTo(w / 2, h + b, 0, h - b);
+    } else if (bottomRadius > 0) {
+      final br = bottomRadius;
+      path
+        ..lineTo(w, h - br)
+        ..arcToPoint(Offset(w - br, h), radius: Radius.circular(br))
+        ..lineTo(br, h)
+        ..arcToPoint(Offset(0, h - br), radius: Radius.circular(br));
+    } else {
+      path
+        ..lineTo(w, h)
+        ..lineTo(0, h);
+    }
+    return path..close();
   }
 
   @override
   bool shouldReclip(BannerBandClipper old) =>
-      old.topRadius != topRadius || old.bottomBulge != bottomBulge;
+      old.topRadius != topRadius ||
+      old.bottomBulge != bottomBulge ||
+      old.bottomRadius != bottomRadius;
 }

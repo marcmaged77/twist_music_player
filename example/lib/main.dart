@@ -18,6 +18,10 @@ final ValueNotifier<Locale> _locale = ValueNotifier<Locale>(const Locale('en'));
 /// True docks the bar through [TwistPlayerHost]; false places [TwistMiniPlayer] by hand.
 final ValueNotifier<bool> _useHost = ValueNotifier<bool>(true);
 
+/// The lane style on show; the button in the app bar cycles through them.
+final ValueNotifier<TwistSwimlaneStyle> _style =
+    ValueNotifier<TwistSwimlaneStyle>(TwistSwimlaneStyle.coverflow);
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await TwistMusicPlayer.init(
@@ -41,7 +45,7 @@ class ExampleApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
-      listenable: Listenable.merge([_locale, _useHost]),
+      listenable: Listenable.merge([_locale, _useHost, _style]),
       builder: (context, _) => MaterialApp(
         title: 'Twist demo host',
         debugShowCheckedModeBanner: false,
@@ -74,6 +78,13 @@ class HomePage extends StatelessWidget {
         title: const Text('Twist demo host'),
         actions: [
           TextButton(
+            onPressed: () {
+              const values = TwistSwimlaneStyle.values;
+              _style.value = values[(_style.value.index + 1) % values.length];
+            },
+            child: Text(_style.value.name),
+          ),
+          TextButton(
             onPressed: () => _useHost.value = !_useHost.value,
             child: Text(_useHost.value ? 'Manual bar' : 'Docked bar'),
           ),
@@ -103,7 +114,7 @@ class HomePage extends StatelessWidget {
           padding: EdgeInsets.only(bottom: TwistPlayerHost.bottomPaddingOf(context) + 24),
           children: [
             const _FeedCard(title: 'Host content above the lane'),
-            const TwistMusicSwimlane(style: TwistSwimlaneStyle.banner),
+            TwistMusicSwimlane(style: _style.value),
             const _FeedCard(title: 'Host content below the lane'),
             ValueListenableBuilder<bool>(
               valueListenable: player.isActive,

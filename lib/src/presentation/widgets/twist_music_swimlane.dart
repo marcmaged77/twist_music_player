@@ -7,22 +7,18 @@ import '../../theme/twist_music_theme.dart';
 import '../../twist_music_player_impl.dart';
 import '../controllers/twist_lane_controller.dart';
 import 'swimlane/banner_band.dart';
+import 'swimlane/coverflow_carousel.dart';
+import 'swimlane/coverflow_header.dart';
+import 'swimlane/coverflow_track_card.dart';
 import 'swimlane/peek_carousel.dart';
 import 'swimlane/swimlane_banner.dart';
 import 'swimlane/swimlane_header.dart';
 import 'swimlane/swimlane_skeleton.dart';
+import 'swimlane/swimlane_style.dart';
 import 'swimlane/track_card.dart';
 import 'twist_prompt_listener.dart';
 
-/// How the lane's header is drawn.
-enum TwistSwimlaneStyle {
-  /// Logo, title and a promo chip on the host's background.
-  plain,
-
-  /// A gradient band with the logo, title, offer text and a download pill;
-  /// the cards overlap the band's bottom edge.
-  banner,
-}
+export 'swimlane/swimlane_style.dart';
 
 /// The promotional lane: a header and an endless peek carousel of artwork
 /// cards.
@@ -62,6 +58,12 @@ class TwistMusicSwimlane extends StatefulWidget {
 
   /// Card side for a lane [width] pixels wide: 60 % of it, within bounds.
   static double cardSizeFor(double width) => (width * 0.6).clamp(200.0, 300.0);
+
+  /// Coverflow tile width for a lane [width] pixels wide: half of it, within bounds.
+  static double coverflowCardWidthFor(double width) => (width * 0.5).clamp(170.0, 260.0);
+
+  static double _cardWidthFor(TwistSwimlaneStyle style, double width) =>
+      style == TwistSwimlaneStyle.coverflow ? coverflowCardWidthFor(width) : cardSizeFor(width);
 
   @override
   State<TwistMusicSwimlane> createState() => _TwistMusicSwimlaneState();
@@ -126,9 +128,9 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
                   context,
                   LayoutBuilder(
                     builder: (context, constraints) => SwimlaneSkeleton(
-                        banner: widget.style == TwistSwimlaneStyle.banner,
+                        style: widget.style,
                         cardWidth: widget.cardWidth ??
-                            TwistMusicSwimlane.cardSizeFor(constraints.maxWidth)),
+                            TwistMusicSwimlane._cardWidthFor(widget.style, constraints.maxWidth)),
                   ),
                 );
           case TwistLaneState.empty:
@@ -158,26 +160,27 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
     return TwistPromptListener(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
-          final carousel = SizedBox(
-            height: size,
-            child: PeekCarousel(
-              itemCount: lane.tracks.length,
-              cardWidth: size,
-              autoScrollInterval: widget.autoScrollInterval,
-              itemBuilder: (context, index) {
-                final track = lane.tracks[index];
-                return TrackCard(
-                  track: track,
-                  size: size,
-                  isPlaying: playingId == track.id,
-                  onTap: () => _onTap(track),
-                );
-              },
-            ),
-          );
+          final theme = TwistMusicTheme.of(context);
+          Widget peekCarousel(double size) => SizedBox(
+                height: size,
+                child: PeekCarousel(
+                  itemCount: lane.tracks.length,
+                  cardWidth: size,
+                  autoScrollInterval: widget.autoScrollInterval,
+                  itemBuilder: (context, index) {
+                    final track = lane.tracks[index];
+                    return TrackCard(
+                      track: track,
+                      size: size,
+                      isPlaying: playingId == track.id,
+                      onTap: () => _onTap(track),
+                    );
+                  },
+                ),
+              );
           switch (widget.style) {
             case TwistSwimlaneStyle.plain:
+              final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -189,11 +192,11 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
                     onPromoTap: openDownload,
                   ),
                   const SizedBox(height: 14),
-                  carousel,
+                  peekCarousel(size),
                 ],
               );
             case TwistSwimlaneStyle.banner:
-              final theme = TwistMusicTheme.of(context);
+              final size = widget.cardWidth ?? TwistMusicSwimlane.cardSizeFor(constraints.maxWidth);
               // The rounded band sits behind the header and the top 40 % of the
               // cards; the carousel itself runs edge to edge.
               // Clip.none lets the card shadows spill below the lane.
@@ -220,7 +223,63 @@ class _TwistMusicSwimlaneState extends State<TwistMusicSwimlane> {
                         padding: const EdgeInsets.fromLTRB(36, 22, 36, 0),
                       ),
                       const SizedBox(height: 20),
-                      carousel,
+                      peekCarousel(size),
+                    ],
+                  ),
+                ],
+              );
+            case TwistSwimlaneStyle.coverflow:
+              final cardWidth =
+                  widget.cardWidth ?? TwistMusicSwimlane.coverflowCardWidthFor(constraints.maxWidth);
+              final cardHeight = CoverflowTrackCard.heightFor(cardWidth, theme);
+              // The flat band sits behind the header and the top of the tiles;
+              // the fan runs edge to edge and its shadows spill below the lane.
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    top: 0,
+                    bottom: cardHeight * (1 - CoverflowTrackCard.bandOverlap),
+                    child: BannerBand(
+                      gradient: theme.bannerGradient,
+                      bottomBulge: 0,
+                      bottomRadius: 20,
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CoverflowHeader(
+                        title: title,
+                        subtitle: subtitle,
+                        ctaLabel: strings.swimlaneDownloadCta,
+                        logo: branding?.promoLogo ?? branding?.headerLogo,
+                        onDownload: openDownload,
+                        bandWidth: constraints.maxWidth - 32,
+                      ),
+                      SizedBox(height: 16 * CoverflowHeader.scaleFor(constraints.maxWidth - 32)),
+                      SizedBox(
+                        height: cardHeight,
+                        child: CoverflowCarousel(
+                          itemCount: lane.tracks.length,
+                          cardWidth: cardWidth,
+                          cardHeight: cardHeight,
+                          autoScrollInterval: widget.autoScrollInterval,
+                          onItemTap: (index) => _onTap(lane.tracks[index]),
+                          itemBuilder: (context, index) {
+                            final track = lane.tracks[index];
+                            return CoverflowTrackCard(
+                              track: track,
+                              width: cardWidth,
+                              isPlaying: playingId == track.id,
+                              onTap: () => _onTap(track),
+                            );
+                          },
+                        ),
+                      ),
                     ],
                   ),
                 ],

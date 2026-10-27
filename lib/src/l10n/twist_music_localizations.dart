@@ -68,7 +68,8 @@ abstract class TwistMusicLocalizations {
   final String localeName;
 
   static TwistMusicLocalizations of(BuildContext context) {
-    return Localizations.of<TwistMusicLocalizations>(context, TwistMusicLocalizations)!;
+    return Localizations.of<TwistMusicLocalizations>(
+        context, TwistMusicLocalizations)!;
   }
 
   static const LocalizationsDelegate<TwistMusicLocalizations> delegate =
@@ -93,7 +94,10 @@ abstract class TwistMusicLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('ar'), Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('en')
+  ];
 
   /// No description provided for @swimlaneTitle.
   ///
@@ -209,6 +213,12 @@ abstract class TwistMusicLocalizations {
   /// **'Download Twist'**
   String get downloadPromptCta;
 
+  /// No description provided for @swimlaneDownloadCta.
+  ///
+  /// In en, this message translates to:
+  /// **'Download Now'**
+  String get swimlaneDownloadCta;
+
   /// No description provided for @downloadPromptDismiss.
   ///
   /// In en, this message translates to:
@@ -222,16 +232,19 @@ abstract class TwistMusicLocalizations {
   String get notificationChannelName;
 }
 
-class _TwistMusicLocalizationsDelegate extends LocalizationsDelegate<TwistMusicLocalizations> {
+class _TwistMusicLocalizationsDelegate
+    extends LocalizationsDelegate<TwistMusicLocalizations> {
   const _TwistMusicLocalizationsDelegate();
 
   @override
   Future<TwistMusicLocalizations> load(Locale locale) {
-    return SynchronousFuture<TwistMusicLocalizations>(lookupTwistMusicLocalizations(locale));
+    return SynchronousFuture<TwistMusicLocalizations>(
+        lookupTwistMusicLocalizations(locale));
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['ar', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['ar', 'en'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_TwistMusicLocalizationsDelegate old) => false;

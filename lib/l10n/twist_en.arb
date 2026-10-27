@@ -19,6 +19,7 @@
   "downloadPromptTitle": "Want to enjoy the full experience?",
   "downloadPromptSubtitle": "Download Twist app and listen to millions of songs",
   "downloadPromptCta": "Download Twist",
+  "swimlaneDownloadCta": "Download Now",
   "downloadPromptDismiss": "Not now",
   "notificationChannelName": "Music playback"
 }
