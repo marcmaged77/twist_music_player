@@ -1,3 +1,7 @@
+## 0.4.1
+
+- Fixed: in right-to-left locales the docked bar drew its artwork over the close button. The flying artwork now follows the bar row's start side, so the close button stays clear in Arabic.
+
 ## 0.4.0
 
 - `TwistMusicSwimlane(style: TwistSwimlaneStyle.coverflow)`: the brand band with a flat, rounded bottom edge; the wordmark and a translucent "Download Now" pill on one line, the lane title in caps and the offer text under it; and an endless fan of tiles: the centre one upright and on top, the neighbours tucked under it at 72 %, tilted 7° outwards and dimmed under a white veil (opaque, not transparent), each a translucent white tile with the artwork, a bottom-left "Now Playing" row while it plays, and the title and artist underneath. Taps resolve to the tile actually on top. Mirrors in RTL.
