@@ -142,6 +142,31 @@ void main() {
       await tester.pump();
     });
 
+    testWidgets('in RTL the docked bar mirrors its flying artwork, so the close button stays clear',
+        (tester) async {
+      final setup = await initTestPlayer();
+      await pumpTestApp(
+        tester,
+        const SizedBox.shrink(),
+        locale: const Locale('ar'),
+        builder: (context, child) => TwistPlayerHost(child: child!),
+      );
+      await setup.player.engine.play(track(1), queue: tracks(1));
+      await setup.backend.emitReady();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      final width = tester.getSize(find.byType(TwistPlayerHost)).width;
+      final art = tester.getRect(find.byKey(TwistPlayerHost.artworkKey));
+      final close = tester.getRect(find.byIcon(Iconsax.close_circle));
+      expect(art.center.dx, greaterThan(width / 2));
+      expect(close.center.dx, lessThan(width / 2));
+      expect(close.overlaps(art), isFalse);
+
+      await setup.player.stop();
+      await tester.pump();
+    });
+
     testWidgets('the docked bar expands in place, collapses, and shows the prompt in its layer',
         (tester) async {
       final setup = await initTestPlayer();

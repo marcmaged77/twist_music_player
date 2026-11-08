@@ -51,6 +51,9 @@ class TwistPlayerHost extends StatefulWidget {
 
   static const double miniPlayerHeight = 56;
 
+  /// Marks the artwork that flies between the bar slot and the full player.
+  static const Key artworkKey = Key('twistMusic_hostArtwork');
+
   /// Space a scroll view should reserve while the bar is shown.
   static double bottomPaddingOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_TwistPlayerInset>()?.inset ?? 0;
@@ -325,7 +328,11 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
 
     final rect = Rect.lerp(barRect, fullRect, t)!;
     final radius = lerpDouble(TwistPlayerHost.miniPlayerHeight / 2, fullRadius, t)!;
-    final miniArt = Rect.fromLTWH(barRect.left + 12, barRect.top + 6, 44, 44);
+    // The bar row keeps its artwork slot at the start, so the flying artwork
+    // mirrors in RTL instead of covering the trailing close button.
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final miniArt = Rect.fromLTWH(
+        rtl ? barRect.right - 12 - 44 : barRect.left + 12, barRect.top + 6, 44, 44);
     final side = size.width - 48;
     final target = _measureArtworkTarget() ??
         Rect.fromCenter(center: fullRect.center, width: side, height: side);
@@ -444,6 +451,7 @@ class _TwistPlayerHostState extends State<TwistPlayerHost>
           child: Opacity(
             opacity: appear,
             child: ClipRRect(
+              key: TwistPlayerHost.artworkKey,
               borderRadius: BorderRadius.circular(10),
               child: artworkUrl == null
                   ? ColoredBox(
